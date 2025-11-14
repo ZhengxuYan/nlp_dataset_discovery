@@ -40,11 +40,14 @@ class ArxivSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super(ArxivSpider, self).__init__(*args, **kwargs)
 
-        # Create results directory if it doesn't exist
-        results_dir = "results"
+        # Use project root data/raw directory for cleaner organization
+        project_root = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../../../../")
+        )
+        results_dir = os.path.join(project_root, "data", "raw")
         os.makedirs(results_dir, exist_ok=True)
 
-        # Open file using relative path
+        # Open file using absolute path to data/raw
         results_file = os.path.join(results_dir, "arxiv_results.csv")
 
         # Check if file exists and has content to determine if we need header
@@ -59,12 +62,20 @@ class ArxivSpider(scrapy.Spider):
         if not file_exists:
             self.writer.writerow(
                 [
-                    "Link/DOI",
+                    "arXiv ID",
+                    "arXiv URL",
+                    "PDF URL",
+                    "DOI",
                     "Publication Date",
+                    "Updated Date",
                     "Title",
                     "Authors",
+                    "Author Affiliations",
                     "Abstract",
                     "Categories",
+                    "Primary Category",
+                    "Comment",
+                    "Journal Reference",
                 ]
             )
 
@@ -158,9 +169,24 @@ class ArxivSpider(scrapy.Spider):
                     else ""
                 )
 
-                # Get arXiv URL from the id element
+                # Get arXiv URL and ID from the id element
                 id_elem = entry.find("atom:id", namespaces)
                 arxiv_url = id_elem.text if id_elem is not None else ""
+
+                # Extract arXiv ID (e.g., "2501.12345" from "http://arxiv.org/abs/2501.12345")
+                arxiv_id = arxiv_url.split("/abs/")[-1] if arxiv_url else ""
+
+                # Get PDF URL from links
+                pdf_url = ""
+                link_elems = entry.findall("atom:link", namespaces)
+                for link in link_elems:
+                    if link.get("title") == "pdf":
+                        pdf_url = link.get("href", "")
+                        break
+
+                # Get DOI
+                doi_elem = entry.find("arxiv:doi", namespaces)
+                doi = doi_elem.text if doi_elem is not None else ""
 
                 # Get published date
                 published_elem = entry.find("atom:published", namespaces)
@@ -171,6 +197,16 @@ class ArxivSpider(scrapy.Spider):
                     publication_date = published_date.date().isoformat()
                 else:
                     publication_date = ""
+
+                # Get updated date
+                updated_elem = entry.find("atom:updated", namespaces)
+                if updated_elem is not None:
+                    updated_date = datetime.fromisoformat(
+                        updated_elem.text.replace("Z", "+00:00")
+                    )
+                    updated_date_str = updated_date.date().isoformat()
+                else:
+                    updated_date_str = ""
 
                 # Filter by date range - skip papers outside our range
                 if publication_date:
@@ -192,14 +228,23 @@ class ArxivSpider(scrapy.Spider):
                         )
                         continue
 
-                # Get authors
+                # Get authors and their affiliations
                 author_elems = entry.findall("atom:author", namespaces)
                 authors = []
+                affiliations = []
                 for author in author_elems:
                     name_elem = author.find("atom:name", namespaces)
                     if name_elem is not None:
                         authors.append(name_elem.text)
+                    # Get affiliation if available
+                    affiliation_elem = author.find("arxiv:affiliation", namespaces)
+                    if affiliation_elem is not None:
+                        affiliations.append(
+                            f"{name_elem.text}: {affiliation_elem.text}"
+                        )
+
                 authors_str = "; ".join(authors)
+                affiliations_str = "; ".join(affiliations) if affiliations else ""
 
                 # Get abstract
                 summary_elem = entry.find("atom:summary", namespaces)
@@ -218,15 +263,54 @@ class ArxivSpider(scrapy.Spider):
                         categories.append(term)
                 categories_str = "; ".join(categories)
 
+                # Get primary category
+                primary_category_elem = entry.find("arxiv:primary_category", namespaces)
+                primary_category = (
+                    primary_category_elem.get("term")
+                    if primary_category_elem is not None
+                    else ""
+                )
+
+                # Filter: only keep papers where primary category is one of our target categories
+                if primary_category not in self.cs_categories:
+                    self.logger.debug(
+                        f"Skipping paper '{title[:50]}...' - primary category '{primary_category}' not in target categories"
+                    )
+                    continue
+
+                # Get comment (often contains page count, conference info, etc.)
+                comment_elem = entry.find("arxiv:comment", namespaces)
+                comment = (
+                    comment_elem.text.strip().replace("\n", " ")
+                    if comment_elem is not None
+                    else ""
+                )
+
+                # Get journal reference
+                journal_ref_elem = entry.find("arxiv:journal_ref", namespaces)
+                journal_ref = (
+                    journal_ref_elem.text.strip().replace("\n", " ")
+                    if journal_ref_elem is not None
+                    else ""
+                )
+
                 # Write to CSV
                 self.writer.writerow(
                     [
+                        arxiv_id,
                         arxiv_url,
+                        pdf_url,
+                        doi,
                         publication_date,
+                        updated_date_str,
                         title,
                         authors_str,
+                        affiliations_str,
                         abstract,
                         categories_str,
+                        primary_category,
+                        comment,
+                        journal_ref,
                     ]
                 )
 

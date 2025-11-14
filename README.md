@@ -13,43 +13,28 @@ This project provides automated scrapers to help researchers discover newly publ
 ## Project Structure
 
 ```
-
 nlp_dataset_discovery/
-
-├── arxiv_scraper/           # Scrapy-based arXiv scraper
-
-│   ├── arxiv_scraper/
-
-│   │   ├── spiders/
-
-│   │   │   └── arxiv.py     # Main arXiv spider
-
-│   │   ├── pipelines.py
-
-│   │   └── settings.py
-
-│   ├── results/
-
+├── data/                    # All data files (raw and processed)
+│   ├── raw/                 # Raw scraped data
 │   │   └── arxiv_results.csv
-
-│   └── filter_by_date.py
-
+│   └── processed/           # LLM-extracted metadata
+│       └── arxiv_results_metadata_*.csv
 │
-
-├── conference_scraper/      # OpenReview conference scraper
-
-│   ├── scrape_openreview.py          # Main scraper class
-
-│   ├── scrape_neurips_datasets_track.py  # NeurIPS D&B track scraper
-
-│   └── results/
-
-│       └── neurips_2024_2025_datasets_benchmarks_track.csv
-
+├── scrapers/                # Data collection scripts
+│   ├── arxiv_scraper/       # Scrapy-based arXiv scraper
+│   │   └── arxiv_scraper/
+│   │       └── spiders/
+│   │           └── arxiv.py
+│   └── conference_scraper/  # OpenReview scraper
+│       ├── scrape_openreview.py
+│       └── scrape_neurips_datasets_track.py
 │
-
-└── README.md
-
+├── scripts/                 # Analysis and metadata extraction
+│   ├── dataset_metadata_extractor.py  # Main LLM extraction
+│   ├── analyze_metadata.py
+│   └── merge_metadata_batches.py
+│
+└── scrapyenv/              # Virtual environment
 ```
 
 ## Features
@@ -140,19 +125,16 @@ pipinstallrequestspandaspyarrow
 **Basic usage:**
 
 ```bash
-
-cdarxiv_scraper
-
-scrapycrawlarxiv
-
+cd scrapers/arxiv_scraper
+scrapy crawl arxiv
 ```
+
+Results are automatically saved to `data/raw/arxiv_results.csv`
 
 **With custom date range:**
 
 ```bash
-
-scrapycrawlarxiv-astart_date=2025-10-01-aend_date=2025-11-01
-
+scrapy crawl arxiv -a start_date=2025-10-01 -a end_date=2025-11-01
 ```
 
 **Configuration:**
@@ -167,19 +149,32 @@ scrapycrawlarxiv-astart_date=2025-10-01-aend_date=2025-11-01
 
 **Output:**
 
-- CSV file: `arxiv_scraper/results/arxiv_results.csv`
-- Columns: Link/DOI, Publication Date, Title, Authors, Abstract, Categories
+- CSV file: `data/raw/arxiv_results.csv`
+- Columns: arXiv ID, Title, Authors, Abstract, Categories, Publication Date, URLs
 
-### 2. Scraping NeurIPS Datasets and Benchmarks Track
+### 2. Extracting Dataset Metadata with LLMs
+
+**Extract metadata from papers:**
+
+```bash
+# Simple - uses defaults (data/raw/arxiv_results.csv)
+python scripts/dataset_metadata_extractor.py --minimal --max-papers 20
+
+# Or specify input explicitly
+python scripts/dataset_metadata_extractor.py data/raw/arxiv_results.csv --minimal
+```
+
+Results are automatically saved to `data/processed/arxiv_results_metadata_minimal_TIMESTAMP.csv`
+
+See `scripts/README_metadata_extraction.md` for full details.
+
+### 3. Scraping NeurIPS Datasets and Benchmarks Track
 
 **Quick start:**
 
 ```bash
-
-cdconference_scraper
-
-python3scrape_neurips_datasets_track.py
-
+cd scrapers/conference_scraper
+python3 scrape_neurips_datasets_track.py
 ```
 
 This will scrape both NeurIPS 2024 and 2025 Datasets and Benchmarks Track papers.
@@ -201,7 +196,7 @@ end_year =2025# Change to desired end year
 - CSV file: `conference_scraper/results/neurips_2024_2025_datasets_benchmarks_track.csv`
 - Columns: year, id, title, abstract, authors, author_ids, venue, primary_area, decision, scores, keywords, openreview_url
 
-### 3. General Conference Scraping (ICLR, NeurIPS, etc.)
+### 4. General Conference Scraping (ICLR, NeurIPS, etc.)
 
 **Command line:**
 
@@ -266,18 +261,26 @@ scraper.save_to_parquet("output.parquet")
 
 ## Data Files
 
-### Current Dataset Collections
+All data is organized in the `data/` directory:
 
-1.**arXiv Papers** (`arxiv_scraper/results/arxiv_results.csv`)
+### `data/raw/` - Raw Scraped Data
 
-- ~5,868 papers from Oct-Nov 2025
-- 9 NLP-relevant CS categories
+1. **arXiv Papers** (`arxiv_results.csv`)
 
-  2.**NeurIPS Datasets and Benchmarks Track** (`conference_scraper/results/neurips_2024_2025_datasets_benchmarks_track.csv`)
+   - Papers from specified date range
+   - 9 NLP-relevant CS categories
+   - Updated via `scrapy crawl arxiv`
 
-- 956 papers (459 from 2024, 497 from 2025)
-- Includes posters, spotlights, and oral presentations
-- Official track: [NeurIPS 2024 D&amp;B](https://openreview.net/group?id=NeurIPS.cc/2024/Datasets_and_Benchmarks_Track) | [NeurIPS 2025 D&amp;B](https://openreview.net/group?id=NeurIPS.cc/2025/Datasets_and_Benchmarks_Track)
+2. **Conference Papers** (various files)
+   - NeurIPS, ICLR, etc. papers
+   - Updated via conference scrapers
+
+### `data/processed/` - Extracted Metadata
+
+- **Dataset Metadata** (`arxiv_results_metadata_*.csv`)
+  - LLM-extracted structured metadata
+  - 14 dimensions (minimal) or 25 dimensions (full)
+  - Generated via `dataset_metadata_extractor.py`
 
 ## Key Features
 
