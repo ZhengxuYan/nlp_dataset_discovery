@@ -583,6 +583,128 @@ def create_visualizations(df: pd.DataFrame, output_dir: str):
     print(f"\n✓ All visualizations saved to {output_dir}")
 
 
+def create_combined_visualization(df: pd.DataFrame, output_dir: str):
+    """Create a combined dashboard visualization with multiple charts."""
+
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    # Set style
+    sns.set_style("whitegrid")
+
+    # Filter to dataset papers only
+    dataset_df = (
+        df[df["is_dataset_paper"].str.lower().isin(["yes", "y"])]
+        if "is_dataset_paper" in df.columns
+        else df
+    )
+
+    print("\nCreating combined dashboard visualization...")
+
+    # Create figure with subplots (3 rows, 2 columns)
+    fig = plt.figure(figsize=(16, 18))
+    gs = fig.add_gridspec(3, 2, hspace=0.3, wspace=0.3)
+
+    # 1. Dataset vs Non-Dataset Papers (top left)
+    if "is_dataset_paper" in df.columns:
+        ax1 = fig.add_subplot(gs[0, 0])
+        dataset_counts = df["is_dataset_paper"].value_counts()
+        colors = ["#2ecc71", "#e74c3c"]
+        wedges, texts, autotexts = ax1.pie(
+            dataset_counts.values,
+            labels=dataset_counts.index,
+            autopct="%1.1f%%",
+            startangle=90,
+            colors=colors,
+        )
+        ax1.set_title("Dataset Classification", fontsize=13, fontweight="bold", pad=15)
+
+    # 2. Dataset Scale (top right)
+    if "approximate_scale" in dataset_df.columns and len(dataset_df) > 0:
+        ax2 = fig.add_subplot(gs[0, 1])
+        scale_order = ["<10K", "10K-100K", "100K-1M", ">1M"]
+        scale_counts = dataset_df["approximate_scale"].value_counts()
+        ordered_counts = [scale_counts.get(scale, 0) for scale in scale_order]
+        ax2.bar(scale_order, ordered_counts, color="skyblue", edgecolor="navy")
+        ax2.set_xlabel("Dataset Scale", fontsize=11)
+        ax2.set_ylabel("Count", fontsize=11)
+        ax2.set_title(
+            "Dataset Scale Distribution", fontsize=13, fontweight="bold", pad=15
+        )
+        ax2.tick_params(axis="x", rotation=0)
+
+    # 3. LLM Involvement (middle left)
+    if "llm_involvement" in dataset_df.columns and len(dataset_df) > 0:
+        ax3 = fig.add_subplot(gs[1, 0])
+        llm_counts = dataset_df["llm_involvement"].value_counts().head(8)
+        colors_llm = sns.color_palette("Set2", len(llm_counts))
+        llm_counts.plot(kind="bar", ax=ax3, color=colors_llm)
+        ax3.set_xlabel("LLM Involvement", fontsize=11)
+        ax3.set_ylabel("Count", fontsize=11)
+        ax3.set_title(
+            "LLM Involvement in Dataset Creation",
+            fontsize=13,
+            fontweight="bold",
+            pad=15,
+        )
+        ax3.tick_params(axis="x", rotation=45)
+
+    # 4. Language Coverage (middle right)
+    if "language_coverage" in dataset_df.columns and len(dataset_df) > 0:
+        ax4 = fig.add_subplot(gs[1, 1])
+        lang_counts = dataset_df["language_coverage"].value_counts().head(8)
+        lang_counts.plot(kind="bar", ax=ax4, color="mediumseagreen")
+        ax4.set_xlabel("Language", fontsize=11)
+        ax4.set_ylabel("Count", fontsize=11)
+        ax4.set_title("Top 8 Language Coverage", fontsize=13, fontweight="bold", pad=15)
+        ax4.tick_params(axis="x", rotation=45)
+
+    # 5. Task Families (bottom left)
+    if "task_family" in dataset_df.columns and len(dataset_df) > 0:
+        ax5 = fig.add_subplot(gs[2, 0])
+        task_counts = dataset_df["task_family"].value_counts().head(10)
+        task_counts.plot(kind="barh", ax=ax5, color="mediumpurple")
+        ax5.set_xlabel("Count", fontsize=11)
+        ax5.set_ylabel("")
+        ax5.set_title("Top 10 Task Families", fontsize=13, fontweight="bold", pad=15)
+
+    # 6. Scope of Use (bottom right)
+    if "scope_of_use" in dataset_df.columns and len(dataset_df) > 0:
+        ax6 = fig.add_subplot(gs[2, 1])
+        scope_counts = dataset_df["scope_of_use"].value_counts()
+        colors_scope = ["#3498db", "#e74c3c", "#2ecc71", "#f39c12"]
+        wedges, texts, autotexts = ax6.pie(
+            scope_counts.values,
+            labels=scope_counts.index,
+            autopct="%1.1f%%",
+            startangle=90,
+            colors=colors_scope[: len(scope_counts)],
+        )
+        ax6.set_title(
+            "Scope of Use Distribution", fontsize=13, fontweight="bold", pad=15
+        )
+
+    # Add overall title
+    fig.suptitle(
+        f"NLP Dataset Papers Analysis Dashboard (n={len(dataset_df)} dataset papers)",
+        fontsize=16,
+        fontweight="bold",
+        y=0.995,
+    )
+
+    # Save the combined figure
+    plt.savefig(
+        output_path / "00_combined_dashboard.png",
+        dpi=300,
+        bbox_inches="tight",
+        facecolor="white",
+    )
+    plt.close()
+
+    print("  Created: 00_combined_dashboard.png")
+    print(f"  Combined dashboard saved to {output_dir}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Analyze dataset metadata extraction results"
@@ -591,6 +713,12 @@ def main():
     parser.add_argument("--report", "-r", help="Save analysis report to file")
     parser.add_argument("--json", "-j", help="Save analysis results as JSON")
     parser.add_argument("--graphs", "-g", help="Directory to save visualization graphs")
+    parser.add_argument(
+        "--combined",
+        "-c",
+        action="store_true",
+        help="Create a combined dashboard visualization (requires --graphs)",
+    )
 
     args = parser.parse_args()
 
@@ -613,6 +741,10 @@ def main():
 
     # Create visualizations if requested
     if args.graphs:
+        if args.combined:
+            # Create combined dashboard first
+            create_combined_visualization(df, args.graphs)
+        # Always create individual graphs when --graphs is specified
         create_visualizations(df, args.graphs)
 
     # Save report if requested

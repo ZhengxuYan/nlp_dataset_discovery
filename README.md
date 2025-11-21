@@ -204,11 +204,14 @@ python utils/analyze_metadata.py data/processed/arxiv_results_metadata_curator_T
 # Generate visualizations
 python utils/analyze_metadata.py data/processed/arxiv_results_metadata_curator_TIMESTAMP.csv --graphs data/visualizations/
 
+# Generate visualizations with combined dashboard
+python utils/analyze_metadata.py data/processed/arxiv_results_metadata_curator_TIMESTAMP.csv --graphs data/visualizations/ --combined
+
 # Save JSON analysis
 python utils/analyze_metadata.py data/processed/arxiv_results_metadata_curator_TIMESTAMP.csv --json results.json
 ```
 
-The analysis provides statistics on dataset classification, roles, intended uses, language coverage, LLM involvement, scale distribution, task families, domains, and contributions. When run with `--graphs`, it generates 10 visualization charts in PNG format.
+The analysis provides statistics on dataset classification, roles, intended uses, language coverage, LLM involvement, scale distribution, task families, domains, and contributions. When run with `--graphs`, it generates 10 individual visualization charts in PNG format. The `--combined` flag creates an additional dashboard that combines 6 key visualizations into a single presentation-ready image.
 
 ### 4. Scraping NeurIPS Datasets and Benchmarks Track
 
@@ -325,11 +328,24 @@ All data is organized in the `data/` directory:
 
 ### `data/visualizations/` - Analysis Charts
 
-- 10 visualization charts (PNG format)
-  - Dataset classification, roles, uses, languages
-  - LLM involvement, scale distribution
-  - Task families, domains, contributions
+- 10 individual visualization charts (PNG format)
+
+  - `01_dataset_classification.png` - Dataset vs non-dataset papers
+  - `02_role_in_paper.png` - Dataset roles distribution
+  - `03_intended_use.png` - Primary use cases
+  - `04_language_coverage.png` - Language distribution
+  - `05_llm_involvement.png` - LLM usage in dataset creation
+  - `06_dataset_scale.png` - Dataset size distribution
+  - `07_task_families.png` - Task type distribution
+  - `08_domains.png` - Domain coverage
+  - `09_claimed_contributions.png` - Contribution types
+  - `10_scope_of_use.png` - Scope distribution
   - Generated via `analyze_metadata.py --graphs`
+
+- Combined dashboard (with `--combined` flag)
+  - `00_combined_dashboard.png` - 6 key visualizations in one image
+  - Optimized for presentations and reports
+  - Includes: classification, scale, LLM involvement, languages, tasks, scope
 
 ### `data/reports/` - JSON Reports
 
@@ -461,6 +477,7 @@ python scripts/dataset_metadata_extractor_curator.py
 python utils/analyze_metadata.py \
     data/processed/arxiv_results_metadata_curator_*.csv \
     --graphs data/visualizations/ \
+    --combined \
     --json data/reports/analysis.json
 ```
 
