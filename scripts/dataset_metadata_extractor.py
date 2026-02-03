@@ -286,7 +286,7 @@ def main():
         help="Path to input CSV file with papers (default: data/raw/arxiv_results.csv)",
     )
     parser.add_argument("--output", "-o", help="Path to output CSV file")
-    parser.add_argument("--model", "-m", default="gpt-4o-mini", help="LLM model to use")
+    parser.add_argument("--model", "-m", default="gpt-5-mini", help="LLM model to use")
     parser.add_argument(
         "--max-papers", "-n", type=int, help="Maximum number of papers to process"
     )

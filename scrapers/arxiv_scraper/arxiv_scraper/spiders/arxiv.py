@@ -42,13 +42,13 @@ class ArxivSpider(scrapy.Spider):
 
         # Use project root data/raw directory for cleaner organization
         project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../../../../")
+            os.path.join(os.path.dirname(__file__), "../../../../")
         )
         results_dir = os.path.join(project_root, "data", "raw")
         os.makedirs(results_dir, exist_ok=True)
 
         # Open file using absolute path to data/raw
-        results_file = os.path.join(results_dir, "arxiv_results.csv")
+        results_file = os.path.join(results_dir, "arxiv_results_2023_2025.csv")
 
         # Check if file exists and has content to determine if we need header
         file_exists = os.path.exists(results_file) and os.path.getsize(results_file) > 0

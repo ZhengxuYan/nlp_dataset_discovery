@@ -41,11 +41,11 @@ class DatasetUsage(BaseModel):
     creators: str = Field(description="Who created this dataset? E.g. 'Original Authors', 'Google', 'Stanford University', etc.")
 
 class PaperAnalysisResponse(BaseModel):
-    is_nlp_paper: bool = Field(description="True if the paper describes research related to Natural Language Processing (NLP), Computational Linguistics, or uses text data for ML tasks.")
-    nlp_relevance_explanation: str = Field(description="Brief explanation of why this paper is considered NLP-related or not.")
-    publication_venue: str = Field(description="The derived publication venue (e.g. 'ACL 2023', 'ArXiv', 'NeurIPS 2024') based on the provided metadata and text.")
+    is_nlp_paper: bool = Field(description="True if the paper describes research related to Natural Language Processing (NLP), Computational Linguistics, or uses text data for ML tasks.", default=False)
+    nlp_relevance_explanation: str = Field(description="Brief explanation of why this paper is considered NLP-related or not.", default="None")
+    publication_venue: str = Field(description="The derived publication venue (e.g. 'ACL 2023', 'ArXiv', 'NeurIPS 2024') based on the provided metadata and text.", default="Unknown")
     authors: List[AuthorInfo] = Field(description="List of authors and their affiliations identified in the paper.", default=[])
-    is_dataset_mentioned: bool = Field(description="True ONLY if specific named datasets are explicitly mentioned and used.")
+    is_dataset_mentioned: bool = Field(description="True ONLY if specific named datasets are explicitly mentioned and used.", default=False)
     datasets: List[DatasetUsage] = Field(description="List of datasets found. Include ONLY datasets explicitly named in the text.", default=[])
 
 ANALYSIS_PROMPT = """Analyze the provided text from a research paper to identify dataset usage, author information, and publication details.
@@ -76,13 +76,14 @@ Constraints:
 - Do NOT invent usage details. If the text doesn't say how it's used, state "Unspecified".
 - **CRITICAL**: Do NOT output null values for datasets. If a dataset is not found, do not include it in the list.
 
-Output a JSON object matching the schema.
+Output a JSON object matching the schema below:
+{schema}
 """
 
-# --- Curator LLM ---
+# --- curator LLM ---
 
 class PaperAnalyzer(curator.LLM):
-    response_format = PaperAnalysisResponse
+    # response_format = PaperAnalysisResponse  # Disabled to avoid strict structured output not supported error
 
     def prompt(self, input: dict) -> str:
         # Truncate text to fit context window if necessary (rough estimate)
@@ -90,8 +91,97 @@ class PaperAnalyzer(curator.LLM):
         return ANALYSIS_PROMPT.format(
             text=text, 
             comment=input.get("comment", ""), 
-            journal_ref=input.get("journal_ref", "")
+            journal_ref=input.get("journal_ref", ""),
+            schema=json.dumps(PaperAnalysisResponse.model_json_schema(), indent=2)
         )
+    
+    def parse(self, input: dict, response: str) -> dict:
+        try:
+            # Basic cleanup if model wraps json in markdown
+            response_text = response
+            if "```json" in response_text:
+                response_text = response_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in response_text:
+                response_text = response_text.split("```")[1].split("```")[0].strip()
+            
+            # Helper to clean common JSON syntax errors from LLMs
+            def clean_json_string(text):
+                """
+                Robustly clean a JSON string by handling invalid escape sequences.
+                Iterates through the string and preserves only valid JSON escapes:
+                \\", \\\\, \\/, \\b, \\f, \\n, \\r, \\t, \\uXXXX.
+                All other backslashes are escaped to \\\\.
+                """
+                out = []
+                i = 0
+                n = len(text)
+                while i < n:
+                    char = text[i]
+                    if char == '\\':
+                        # Check next character
+                        if i + 1 < n:
+                            next_char = text[i+1]
+                            if next_char in '"\\/bfnrt':
+                                out.append('\\' + next_char)
+                                i += 2
+                            elif next_char == 'u':
+                                # Check if next 4 chars are hex digits
+                                if i + 5 < n:
+                                    hex_part = text[i+2:i+6]
+                                    import string
+                                    if all(c in string.hexdigits for c in hex_part):
+                                        out.append('\\u' + hex_part)
+                                        i += 6
+                                    else:
+                                        # Invalid unicode escape, escape the backslash
+                                        out.append('\\\\')
+                                        i += 1
+                                else:
+                                    out.append('\\\\')
+                                    i += 1
+                            else:
+                                # Invalid escape char (e.g. \e, \s), escape the backslash
+                                out.append('\\\\')
+                                i += 1
+                        else:
+                            # Backslash at end of string
+                            out.append('\\\\')
+                            i += 1
+                    elif 0 <= ord(char) < 32 and char not in '\t\n\r':
+                         # Skip non-printable control chars
+                         i += 1
+                    else:
+                        out.append(char)
+                        i += 1
+                return "".join(out)
+
+            response_text = clean_json_string(response_text)
+
+            data = json.loads(response_text)
+            
+            # Validate with Pydantic - allow partial filling if model misses fields? 
+            # Strict mode might be too harsh for a weak instruction follower.
+            # Let's try to fill valid fields and default others if validation fails on the first pass?
+            try:
+                validated = PaperAnalysisResponse(**data)
+                return validated.model_dump()
+            except Exception as validation_error:
+                # If it's just missing fields, we might be able to salvage partial data
+                # For now, let's just log it as a failure but maybe try to constructing it manually
+                # But Pydantic error is safer to catch bad structure.
+                 raise validation_error
+
+        except Exception as e:
+            # print(f"Error parsing response: {e}")
+            # print(f"Response was: {response}")
+            return {
+                "is_nlp_paper": False,
+                "nlp_relevance_explanation": f"Failed to parse model response: {e}",
+                "publication_venue": "Unknown",
+                "authors": [],
+                "is_dataset_mentioned": False,
+                "datasets": []
+            }
 
 
 
@@ -154,9 +244,13 @@ def get_text_from_pdf(pdf_path):
         print(f"Error extracting text from PDF {pdf_path}: {e}")
         return ""
 
-def process_papers(limit=None, model_name="gpt-5-mini", backend=None, backend_params=None):
+def process_papers(limit=None, model_name="gpt-5-mini", backend=None, backend_params=None, overwrite=False):
     ensure_dir(TEMP_DIR)
     
+    if overwrite and os.path.exists(OUTPUT_FILE):
+        print(f"Overwriting {OUTPUT_FILE}...")
+        os.remove(OUTPUT_FILE)
+
     # Load existing progress
     processed_ids = set()
     if os.path.exists(OUTPUT_FILE):
@@ -171,13 +265,9 @@ def process_papers(limit=None, model_name="gpt-5-mini", backend=None, backend_pa
     df = pd.read_csv(CSV_PATH)
     # Rename columns to match expected names
     df.rename(columns={'arXiv ID': 'arxiv_id'}, inplace=True)
-    if 'is_dataset_paper' in df.columns:
-        dataset_papers = df[df['is_dataset_paper'] == 'Yes']
-    else:
-        dataset_papers = df
     
     # Filter out already processed
-    dataset_papers = dataset_papers[~dataset_papers['arxiv_id'].astype(str).isin(processed_ids)]
+    dataset_papers = df[~df['arxiv_id'].astype(str).isin(processed_ids)]
     
     print(f"Found {len(dataset_papers)} papers to process.")
     
@@ -188,7 +278,8 @@ def process_papers(limit=None, model_name="gpt-5-mini", backend=None, backend_pa
     analyzer = PaperAnalyzer(
         model_name=model_name,
         backend=backend,
-        backend_params=backend_params
+        backend_params=backend_params,
+        generation_params={"max_tokens": 16384}
     )
     
     BATCH_SIZE = 20
@@ -267,7 +358,7 @@ def process_papers(limit=None, model_name="gpt-5-mini", backend=None, backend_pa
                 # Iterate over results.dataset and inputs together
                 with open(OUTPUT_FILE, 'a') as f:
                     for input_data, response in zip(batch_inputs, results.dataset):
-                        # response is a Dict (from Curator/Arrow dataset)
+                        # response is a Dict (from Curator/Arrow dataset) or the result of parse
                         
                         # Handle authors list (list of dicts)
                         authors_list = response.get("authors", [])
@@ -320,6 +411,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, default="gpt-5-mini", help="Model name to use for analysis (default: gpt-5-mini).")
     parser.add_argument("--backend", type=str, default=None, help="Backend to use (e.g., litellm, openai). Defaults to None (or env BACKEND).")
     parser.add_argument("--backend-params", type=str, default=None, help="JSON string for backend parameters.")
+    parser.add_argument("--overwrite", action="store_true", help="Overwrite the output file and start from scratch (process the first N papers again).")
     args = parser.parse_args()
 
     # Handle backend configuration
@@ -346,4 +438,20 @@ if __name__ == "__main__":
             "max_tokens_per_minute": 4_000_000,
          }
 
-    process_papers(limit=args.limit, model_name=args.model, backend=backend, backend_params=backend_params)
+    import litellm
+    # Register custom model to avoid "model not mapped" error
+    # Pricing: Input: $0.200/1M, Output: $0.600/1M (from user logs, note 0.600 not 6.000 as previously tried)
+    # Register both original and lowercase versions as LiteLLM might normalize keys
+    model_key = "together_ai/Qwen/Qwen3-235B-A22B-Instruct-2507-tput"
+    cost_dict = {
+        "input_cost_per_token": 0.200 / 1_000_000,
+        "output_cost_per_token": 0.600 / 1_000_000,
+        "max_tokens": 32768, 
+        "litellm_provider": "together_ai",
+        "mode": "chat"
+    }
+    litellm.model_cost[model_key] = cost_dict
+    litellm.model_cost[model_key.lower()] = cost_dict
+    litellm.model_cost["qwen/qwen3-235b-a22b-instruct-2507-tput"] = cost_dict # Case sometimes stripped of provider prefix in internal checks?
+
+    process_papers(limit=args.limit, model_name=args.model, backend=backend, backend_params=backend_params, overwrite=args.overwrite)
