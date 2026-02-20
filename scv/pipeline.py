@@ -99,9 +99,13 @@ def run_extraction_stage(limit: int = 200, output_file: str = 'data/processed/sc
                  download_file(pdf_url, pdf_path)
             
             if os.path.exists(pdf_path):
-                text = get_text_from_pdf(pdf_path)
+                try:
+                    text = get_text_from_pdf(pdf_path)
+                except Exception as e:
+                    print(f"Error reading PDF {arxiv_id}: {e}")
+                    text = ""
             
-            if text:
+            if text or str(row.get('Abstract', '')):
                 # Extract extra CSV metadata to pass through
                 # 'Journal Reference' or 'Comment' often has venue info.
                 venue = str(row.get('Journal Reference', ''))
@@ -112,7 +116,7 @@ def run_extraction_stage(limit: int = 200, output_file: str = 'data/processed/sc
                     "arxiv_id": arxiv_id,
                     "title": str(row.get('Title', '')),
                     "abstract": str(row.get('Abstract', '')),
-                    "text": text,
+                    "text": text if text else "Text extraction failed. Rely on Abstract.",
                     "date": str(row.get('Publication Date', '')),
                     "venue": venue,
                     "source_type": "ArXiv", # Default for this dataset
@@ -126,9 +130,24 @@ def run_extraction_stage(limit: int = 200, output_file: str = 'data/processed/sc
             continue
             
         # 2. Extract Info
-        try:
-            llm_outputs = extractor(batch_inputs)
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                llm_outputs = extractor(batch_inputs)
+                break # Success
+            except Exception as e:
+                print(f"Batch extraction failed (Attempt {attempt+1}/{max_retries}): {e}")
+                if attempt == max_retries - 1:
+                    print(f"Skipping batch after {max_retries} failures.")
+                    llm_outputs = None
+                else:
+                    import time
+                    time.sleep(5) # Wait before retry
+        
+        if not llm_outputs:
+            continue
             
+        try:
             # 3. Process & Save Intermediate
             for inp, analysis in zip(batch_inputs, llm_outputs.dataset):
                 
@@ -255,11 +274,19 @@ def run_analysis_stage(input_file: str = 'data/processed/scv_intermediate.jsonl'
             # Quality needs to use the NEW robust fields
             qual_score = calculate_quality_score(ds)
             div_score = calculate_diversity_score(ds)
-            nov_score = analyze_novelty_and_get_score(ds, analyzer)
+
+            # Insert Previous Work ACUs into history first (so we compare against them too)
+            if ds.previous_work_acus:
+                analyzer.add_acus(ds.previous_work_acus)
+
+            # Check novelty against history AND explicitly against previous_work_acus (Forced Context)
+            nov_score_llm = analyze_novelty_and_get_score(ds, analyzer, forced_context=ds.previous_work_acus, method='llm')
+            nov_score_nli = analyze_novelty_and_get_score(ds, analyzer, forced_context=ds.previous_work_acus, method='nli')
             
-            scv = construct_scv(nov_score, div_score, qual_score)
+            scv = construct_scv(nov_score_llm, div_score, qual_score)
+            scv['novelty_nli'] = nov_score_nli
             
-            # Update History
+            # Update History with CURRENT paper's ACUs
             if ds.acus:
                 analyzer.add_acus(ds.acus)
             

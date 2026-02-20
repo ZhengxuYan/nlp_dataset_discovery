@@ -36,7 +36,8 @@ Instructions:
         - Maintenance: Any maintenance plan mentioned?
     - **Novelty (Crucial)**: If the dataset is NEW (introduced here):
         - `novelty_summary`: A concise statement of what is new.
-        - `acus`: List of Atomic Content Units. Short, independent sentences comprising the claim (e.g., "We introduce DatasetX.", "DatasetX contains 50k images.", "DatasetX covers 10 languages.").
+        - `acus`: List of Atomic Content Units. Break information into extremely granular, short, independent sentences. Each ACU must contain only ONE single, simple fact. Avoid compound sentences and conjunctions (e.g., break "Data and code are released on GitHub" into "Data is released on GitHub." and "Code is released on GitHub.").
+        - `previous_work_acus`: Extract 3-5 ACUs of relevant PREVIOUS WORK mentioned in the text (e.g. "Previous Dataset Y only covered English.", "Dataset Z used heuristic filtering."). This helps in comparing the new contribution.
     - **Transparency Issues**: Note if links/license/provenance are missing.
 
 Constraints:
@@ -47,7 +48,8 @@ Constraints:
 Output JSON matching the schema.
 IMPORTANT: 
 - You MUST populate `acus` for any introduced dataset.
-- ACUs should be short, factual sentences like "We introduce the XYZ dataset." or "XYZ consists of 100k samples."
+- ACUs should be extremely short, concise, and contain only ONE factual claim per sentence. Break down any complex or compound sentences into multiple simpler ACUs.
+- Populate `previous_work_acus` if the paper discusses prior art constraints or features.
 - Populate the `size` object fields carefully.
 """
 

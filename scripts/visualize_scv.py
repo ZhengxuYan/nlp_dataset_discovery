@@ -33,7 +33,7 @@ sns.set_theme(style="whitegrid", context="talk")
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Generate demonstration-ready visualizations for SCV outputs."
+        description="Generate demonstration-ready visualizations for Scientific Contribution Vector (SCV) outputs."
     )
     parser.add_argument(
         "--scv-file",
@@ -238,6 +238,11 @@ def build_frames(records: List[dict]) -> Tuple[pd.DataFrame, pd.DataFrame]:
         affiliation = classify_affiliation(authors)
         introduced = [
             ds for ds in record.get("datasets", []) if ds.get("info", {}).get("is_introduced")
+        ]
+        # Filter out datasets with novelty score of 1.0
+        introduced = [
+            ds for ds in introduced 
+            if ds.get("scv", {}).get("novelty") != 1.0
         ]
 
         paper_rows.append(
@@ -483,7 +488,7 @@ def scv_hexbin(df_datasets: pd.DataFrame, output_dir: str):
     )
     ax.set_xlabel("Novelty")
     ax.set_ylabel("Quality / transparency")
-    ax.set_title("Density of SCV scores")
+    ax.set_title("Density of Scientific Contribution Vector (SCV) scores")
     cb = fig.colorbar(hb, ax=ax)
     cb.set_label("Datasets")
     plt.tight_layout()
@@ -552,7 +557,7 @@ def affiliation_radar(df_datasets: pd.DataFrame, output_dir: str):
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels([label.title() for label in labels])
     ax.set_ylim(0, 1)
-    ax.set_title("Average SCV profile by affiliation")
+    ax.set_title("Average Scientific Contribution Vector (SCV) profile by affiliation")
     ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1))
     plt.tight_layout()
     path = os.path.join(output_dir, "affiliation_radar.png")

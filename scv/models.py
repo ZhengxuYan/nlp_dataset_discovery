@@ -39,6 +39,7 @@ class DatasetScvInfo(BaseModel):
     # Novelty & Contribution (Only if introduced)
     novelty_summary: str = Field(description="Short statement summarizing what is new about this dataset. 'None' if not introduced.", default="None")
     acus: List[str] = Field(description="Atomic Content Units: Decomposed short claims about the dataset's contribution. Empty if not introduced.", default=[])
+    previous_work_acus: List[str] = Field(description="ACUs of previous work mentioned in the paper. Extract 3-5 key claims/facts about prior datasets/methods if mentioned.", default=[])
 
     # Quality Signals (Issues)
     transparency_issues: List[str] = Field(description="List of potential issues: 'Missing License', 'No Link', 'Unclear Provenance', or 'None'.", default=[])
@@ -59,3 +60,12 @@ class ScvPaperAnalysis(BaseModel):
     authors: List[AuthorInfo] = Field(description="List of authors and their affiliations identified in the paper.", default=[])
     
     datasets: List[DatasetScvInfo] = Field(description="List of datasets explicitly named and used/introduced.", default=[])
+
+class NoveltyScoreDimension(BaseModel):
+    dimension_name: str = Field(description="Name of the dimension (e.g., Task/Domain, Methodology, Data Scale).")
+    explanation: str = Field(description="Explanation of the score comparing the new dataset to the history.")
+    score: float = Field(description="Score between 0.0 (not novel at all) and 1.0 (highly novel).")
+
+class NoveltyScoringResult(BaseModel):
+    dimensions: List[NoveltyScoreDimension] = Field(description="Scoring along different dimensions (Task/Domain, Methodology, Scale).")
+    average_novelty_score: float = Field(description="The average of the scores across all dimensions, representing the final novelty score.")
