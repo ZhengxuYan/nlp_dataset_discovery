@@ -161,7 +161,8 @@ class NoveltyAnalyzer:
         self.history_acus = [] # List of text
         self.history_embeddings = None # Matrix
         load_models()
-        self.llm_evaluator = LlmNoveltyEvaluator(model_name="gpt-4o")
+        # We only need embeddings for this experiment, so we can ignore the LLM
+        self.llm_evaluator = None
         
     def add_acus(self, acus: List[str]):
         if not acus or not SENTENCE_MODEL:
