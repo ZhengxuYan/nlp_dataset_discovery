@@ -157,12 +157,22 @@ HISTORY ACUS (Prior Work Context):
 """
 
 class NoveltyAnalyzer:
-    def __init__(self):
+    def __init__(
+        self,
+        llm_model_name: str | None = None,
+        llm_backend: str | None = None,
+        llm_backend_params: Dict | None = None,
+    ):
         self.history_acus = [] # List of text
         self.history_embeddings = None # Matrix
         load_models()
-        # We only need embeddings for this experiment, so we can ignore the LLM
         self.llm_evaluator = None
+        if llm_model_name:
+            self.llm_evaluator = LlmNoveltyEvaluator(
+                model_name=llm_model_name,
+                backend=llm_backend,
+                backend_params=llm_backend_params,
+            )
         
     def add_acus(self, acus: List[str]):
         if not acus or not SENTENCE_MODEL:
@@ -243,6 +253,8 @@ class NoveltyAnalyzer:
         """
         if not new_acus:
             return 0.0
+        if self.llm_evaluator is None:
+            raise RuntimeError("LLM novelty evaluator is not configured.")
             
         # 1. Embed new ACUs
         new_embs = SENTENCE_MODEL.encode(new_acus, convert_to_numpy=True)

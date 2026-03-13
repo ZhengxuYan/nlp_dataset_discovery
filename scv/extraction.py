@@ -1,6 +1,16 @@
 from bespokelabs import curator
 from .models import ScvPaperAnalysis
 
+
+def condense_text(text: str, max_chars: int) -> str:
+    """Keep prompt size bounded while preserving start and end context."""
+    if not text or len(text) <= max_chars:
+        return text
+
+    head_chars = int(max_chars * 0.7)
+    tail_chars = max_chars - head_chars
+    return f"{text[:head_chars]}\n\n[... truncated ...]\n\n{text[-tail_chars:]}"
+
 ANALYSIS_PROMPT = """Analyze the research paper text to extract structured dataset information for a Scientific Contribution Vector (SCV).
 
 Metadata from Paper Header (if available):
@@ -56,10 +66,14 @@ IMPORTANT:
 class ScvExtractor(curator.LLM):
     response_format = ScvPaperAnalysis
 
+    def __init__(self, *args, text_char_limit: int = 16000, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.text_char_limit = text_char_limit
+
     def prompt(self, input: dict) -> str:
         # Using title/abstract + first chunk of text
         return ANALYSIS_PROMPT.format(
             title=input.get("title", ""),
             abstract=input.get("abstract", ""),
-            text=input.get("text", "")[:30000] 
+            text=condense_text(input.get("text", ""), self.text_char_limit)
         )

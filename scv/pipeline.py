@@ -2,6 +2,8 @@ import os
 import json
 import pandas as pd
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, Optional
 from .models import ScvPaperAnalysis, DatasetScvInfo
 from .extraction import ScvExtractor
 from .utils import ensure_dir, download_file, get_text_from_pdf
@@ -60,7 +62,58 @@ def sample_papers_uniformly(df: pd.DataFrame, limit: int) -> pd.DataFrame:
 
 # --- Main Pipeline Stages ---
 
-def run_extraction_stage(limit: int = 200, output_file: str = 'data/processed/scv_intermediate.jsonl'):
+def prepare_paper_input(row: Dict) -> Optional[Dict]:
+    arxiv_id = str(row['arXiv ID'])
+    paper_dir = os.path.join(TEMP_DIR, arxiv_id)
+    ensure_dir(paper_dir)
+
+    text = ""
+    pdf_url = ARXIV_PDF_URL.format(arxiv_id)
+    pdf_path = os.path.join(paper_dir, 'paper.pdf')
+
+    if not os.path.exists(pdf_path):
+        download_file(pdf_url, pdf_path)
+
+    if os.path.exists(pdf_path):
+        try:
+            text = get_text_from_pdf(pdf_path)
+        except Exception as e:
+            print(f"Error reading PDF {arxiv_id}: {e}")
+            text = ""
+
+    abstract = str(row.get('Abstract', ''))
+    if not text and not abstract:
+        return None
+
+    venue = str(row.get('Journal Reference', ''))
+    if not venue or venue == 'nan':
+        venue = str(row.get('Comment', 'ArXiv'))
+
+    return {
+        "arxiv_id": arxiv_id,
+        "title": str(row.get('Title', '')),
+        "abstract": abstract,
+        "text": text if text else "Text extraction failed. Rely on Abstract.",
+        "date": str(row.get('Publication Date', '')),
+        "venue": venue,
+        "source_type": "ArXiv",
+        "categories": str(row.get('Categories', '')),
+        "primary_category": str(row.get('Primary Category', '')),
+        "doi": str(row.get('DOI', ''))
+    }
+
+
+def run_extraction_stage(
+    limit: int = 200,
+    output_file: str = 'data/processed/scv_intermediate.jsonl',
+    batch_size: int = 10,
+    max_retries: int = 3,
+    pdf_workers: int = 4,
+    text_char_limit: int = 16000,
+    model_name: str = "gpt-5-mini",
+    backend: Optional[str] = None,
+    backend_params: Optional[Dict] = None
+):
     """Stage 1: Extract info and embeddings."""
     ensure_dir(TEMP_DIR)
     
@@ -75,62 +128,44 @@ def run_extraction_stage(limit: int = 200, output_file: str = 'data/processed/sc
     # SAMPLING: "sample papers from different months across 2023 to 2025"
     papers_to_process = sample_papers_uniformly(df, limit)
     print(f"[Extraction] Processing {len(papers_to_process)} papers (sampled)...")
+    print(
+        f"[Extraction] Model: {model_name}, backend: {backend or 'default'}, "
+        f"LLM batch size: {batch_size}, PDF workers: {pdf_workers}, text chars: {text_char_limit}"
+    )
     
-    extractor = ScvExtractor(model_name="gpt-5-mini") 
-    
-    batch_size = 5
+    extractor = ScvExtractor(
+        model_name=model_name,
+        backend=backend,
+        backend_params=backend_params,
+        text_char_limit=text_char_limit
+    )
+
     processed_count = 0
     
     for i in range(0, len(papers_to_process), batch_size):
         batch = papers_to_process.iloc[i:i+batch_size]
-        batch_inputs = []
-        
-        # 1. Download & Prepare Text
-        for _, row in batch.iterrows():
-            arxiv_id = str(row['arXiv ID']) 
-            paper_dir = os.path.join(TEMP_DIR, arxiv_id)
-            ensure_dir(paper_dir)
-            
-            text = ""
-            pdf_url = ARXIV_PDF_URL.format(arxiv_id)
-            pdf_path = os.path.join(paper_dir, 'paper.pdf')
-            
-            if not os.path.exists(pdf_path):
-                 download_file(pdf_url, pdf_path)
-            
-            if os.path.exists(pdf_path):
+        batch_rows = [row.to_dict() for _, row in batch.iterrows()]
+        prepared_inputs = [None] * len(batch_rows)
+
+        with ThreadPoolExecutor(max_workers=max(1, pdf_workers)) as executor:
+            future_to_index = {
+                executor.submit(prepare_paper_input, row): idx
+                for idx, row in enumerate(batch_rows)
+            }
+            for future in as_completed(future_to_index):
+                idx = future_to_index[future]
                 try:
-                    text = get_text_from_pdf(pdf_path)
+                    prepared_inputs[idx] = future.result()
                 except Exception as e:
-                    print(f"Error reading PDF {arxiv_id}: {e}")
-                    text = ""
-            
-            if text or str(row.get('Abstract', '')):
-                # Extract extra CSV metadata to pass through
-                # 'Journal Reference' or 'Comment' often has venue info.
-                venue = str(row.get('Journal Reference', ''))
-                if not venue or venue == 'nan':
-                     venue = str(row.get('Comment', 'ArXiv'))
-                
-                batch_inputs.append({
-                    "arxiv_id": arxiv_id,
-                    "title": str(row.get('Title', '')),
-                    "abstract": str(row.get('Abstract', '')),
-                    "text": text if text else "Text extraction failed. Rely on Abstract.",
-                    "date": str(row.get('Publication Date', '')),
-                    "venue": venue,
-                    "source_type": "ArXiv", # Default for this dataset
-                    # Extra Metadata per user request
-                    "categories": str(row.get('Categories', '')),
-                    "primary_category": str(row.get('Primary Category', '')),
-                    "doi": str(row.get('DOI', ''))
-                })
+                    arxiv_id = str(batch_rows[idx].get('arXiv ID', 'unknown'))
+                    print(f"Error preparing paper {arxiv_id}: {e}")
+
+        batch_inputs = [item for item in prepared_inputs if item]
         
         if not batch_inputs:
             continue
             
         # 2. Extract Info
-        max_retries = 3
         for attempt in range(max_retries):
             try:
                 llm_outputs = extractor(batch_inputs)
@@ -209,7 +244,13 @@ def run_extraction_stage(limit: int = 200, output_file: str = 'data/processed/sc
     print(f"[Extraction] Done. Saved {processed_count} records to {output_file}.")
 
 
-def run_analysis_stage(input_file: str = 'data/processed/scv_intermediate.jsonl', output_file: str = 'data/processed/scv_final_results.jsonl'):
+def run_analysis_stage(
+    input_file: str = 'data/processed/scv_intermediate.jsonl',
+    output_file: str = 'data/processed/scv_final_results.jsonl',
+    novelty_model_name: Optional[str] = None,
+    novelty_backend: Optional[str] = None,
+    novelty_backend_params: Optional[Dict] = None
+):
     """Stage 2: Sort, Analyze Novelty against history, Compute SCV."""
     
     if not os.path.exists(input_file):
@@ -236,7 +277,15 @@ def run_analysis_stage(input_file: str = 'data/processed/scv_intermediate.jsonl'
     print(f"[Analysis] Sorted {len(records)} records by date.")
     
     # Init Analyzer
-    analyzer = NoveltyAnalyzer()
+    analyzer = NoveltyAnalyzer(
+        llm_model_name=novelty_model_name,
+        llm_backend=novelty_backend,
+        llm_backend_params=novelty_backend_params
+    )
+    if analyzer.llm_evaluator:
+        print(f"[Analysis] LLM novelty scorer: {novelty_model_name} via {novelty_backend or 'default'}")
+    else:
+        print("[Analysis] No LLM novelty scorer configured. Falling back to NLI for SCV novelty.")
     
     results = []
     
@@ -280,8 +329,11 @@ def run_analysis_stage(input_file: str = 'data/processed/scv_intermediate.jsonl'
                 analyzer.add_acus(ds.previous_work_acus)
 
             # Check novelty against history AND explicitly against previous_work_acus (Forced Context)
-            nov_score_llm = analyze_novelty_and_get_score(ds, analyzer, forced_context=ds.previous_work_acus, method='llm')
             nov_score_nli = analyze_novelty_and_get_score(ds, analyzer, forced_context=ds.previous_work_acus, method='nli')
+            if analyzer.llm_evaluator:
+                nov_score_llm = analyze_novelty_and_get_score(ds, analyzer, forced_context=ds.previous_work_acus, method='llm')
+            else:
+                nov_score_llm = nov_score_nli
             
             scv = construct_scv(nov_score_llm, div_score, qual_score)
             scv['novelty_nli'] = nov_score_nli
