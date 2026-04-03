@@ -1,12 +1,12 @@
 # Scientific Contribution Vector (SCV) Pipeline
 
-This pipeline processes research papers to extract dataset information, analyze their novelty, and compute a "Scientific Contribution Vector" (SCV) consisting of novelty, diversity, and quality scores.
+This pipeline processes research papers to extract dataset information, analyze their added information relative to prior datasets, and compute a "Scientific Contribution Vector" (SCV) consisting of added-information, diversity, and quality scores.
 
 ## Overview
 
 The pipeline runs in two stages:
 1.  **Extraction Stage**: Downloads papers, extracts structured data (using LLMs), and computes embeddings.
-2.  **Analysis Stage**: Sorts papers by date, compares "Novelty" against prior work (history), and computes final scores.
+2.  **Analysis Stage**: Sorts papers by date, compares each introduced dataset's ACUs against prior support, and computes final scores.
 
 ## Requirements
 
@@ -31,7 +31,7 @@ python scripts/run_scv.py --stage extract --limit 200 --output data/processed/sc
 - Downloads PDF/Source for each paper.
 - Uses `gpt-5-mini` to extract:
     - Dataset metadata (Name, Usage, Tasks, Languages, Size, etc.).
-    - **Novelty Claims**: "Atomic Content Units" (ACUs) - short claims about what is new.
+    - **Added-Information Claims**: "Atomic Content Units" (ACUs) - short claims about what the dataset adds.
 - Computes `SPECTER2` embeddings for the paper abstract.
 - **Filters**: Only saves papers that introduce at least one new dataset.
 
@@ -49,9 +49,9 @@ python scripts/run_scv.py --stage analyze --input data/processed/scv_intermediat
 - Loads the intermediate JSONL file.
 - **Sorts by Publication Date** to simulate a historical timeline.
 - Iterates through papers:
-    - **Novelty Score**: Compares the paper's ACUs against the ACUs of *all previous* papers in the timeline using NLI (Natural Language Inference).
-        - High Entailment by history = Low Novelty.
-        - Low Entailment = High Novelty.
+    - **Added-Information Score**: Compares the paper's ACUs against the ACUs of *all previous* papers in the timeline using NLI or an LLM judge.
+        - High support by history = Low added information.
+        - Low support by history = High added information.
     - **Diversity Score**: Heuristic based on languages, domain, and size.
     - **Quality Score**: Heuristic based on transparency (license, links) and availability.
 - Updates the "History" with the current paper's ACUs (so it becomes prior work for future papers).
@@ -80,12 +80,13 @@ The final JSONL contains records like:
         "name": "New Dataset X",
         "role": "Main Contribution",
         "is_introduced": true,
-        "novelty_summary": "First dataset for...",
+        "added_information_summary": "First dataset for...",
         "acus": ["We introduce dataset X.", "It covers 50 languages."],
         ...
       },
       "scv": {
-        "novelty": 0.85,    # 0.0 - 1.0 (Higher is more novel)
+        "added_information": 0.85,    # 0.0 - 1.0 (Higher means more unsupported new information)
+        "novelty": 0.85,              # Legacy alias
         "diversity": 0.6,   # 0.0 - 1.0
         "quality": 0.9      # 0.0 - 1.0
       }
@@ -94,3 +95,43 @@ The final JSONL contains records like:
   "paper_embedding": [...]
 }
 ```
+
+## Benchmark Workflow
+
+Use the scaffold script to bootstrap a real manually reviewed benchmark:
+
+```bash
+python scripts/bootstrap_real_benchmark.py \
+  --input data/processed/final_scv_200.jsonl \
+  --output data/benchmark/real_added_information_benchmark_template.jsonl \
+  --limit 25
+```
+
+Each row contains:
+
+- a real query dataset and its ACUs
+- a candidate prior-support pool
+- empty gold fields for manual annotation:
+  - `gold_prior_support_ids`
+  - `gold_prior_support_acus`
+  - `gold_added_information_label`
+  - `gold_added_information_rationale`
+
+Evaluate retrieval and added-information estimation with:
+
+```bash
+python run_benchmark.py --input data/benchmark/real_added_information_benchmark_template.jsonl
+```
+
+Implemented retrieval ablations:
+
+- `dense`
+- `lexical`
+- `fusion`
+- `hybrid_rerank`
+
+Implemented evaluation splits:
+
+- retrieval quality
+- oracle prior support
+- end-to-end prior support + added-information estimation

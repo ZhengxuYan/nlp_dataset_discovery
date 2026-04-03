@@ -1,6 +1,6 @@
 from typing import List, Dict
 import numpy as np
-from .models import DatasetScvInfo, NoveltyScoringResult
+from .models import DatasetScvInfo, AddedInformationScoringResult
 from bespokelabs import curator
 
 # Model Global State (Lazy Load)
@@ -126,37 +126,37 @@ def calculate_quality_score(dataset: DatasetScvInfo) -> float:
 
     return max(0.0, min(1.0, score))
 
-class LlmNoveltyEvaluator(curator.LLM):
-    response_format = NoveltyScoringResult
+class LlmAddedInformationEvaluator(curator.LLM):
+    response_format = AddedInformationScoringResult
 
     def prompt(self, input: dict) -> str:
         new_acus_text = "\n".join(f"- {a}" for a in input.get("new_acus", []))
         history_acus_text = "\n".join(f"- {a}" for a in input.get("history_acus", []))
         if not history_acus_text.strip():
-            history_acus_text = "None. Assume high baseline novelty as no direct history is provided."
+            history_acus_text = "None. Assume high added information as no direct prior support is provided."
             
-        return f"""You are an expert NLP researcher evaluating the novelty of a newly introduced dataset. 
-You are given a list of Atomic Content Units (ACUs) representing the claims made about the NEW dataset, and a list of ACUs representing previously existing datasets (History).
+        return f"""You are an expert NLP researcher evaluating the added information of a newly introduced dataset.
+You are given a list of Atomic Content Units (ACUs) representing the claims made about the NEW dataset, and a list of ACUs representing prior support from previously existing datasets.
 
-Compare the NEW dataset's ACUs against the History ACUs. Evaluate the novelty of the new dataset across the following 3 dimensions:
-1. **Task/Domain Novelty**: Does the new dataset cover tasks, subjects, or domains that are non-existent or rare in the history?
-2. **Methodological Novelty**: Does the new dataset introduce a novel collection, annotation, or generation technique compared to history?
-3. **Data Scale/Coverage**: Is the dataset significantly larger, more diverse, or spanning more languages compared to what has been done before?
+Compare the NEW dataset's ACUs against the prior-support ACUs. Evaluate the dataset's added information across the following 3 dimensions:
+1. **Task/Domain Delta**: Does the new dataset cover tasks, subjects, or domains not already supported by the prior data?
+2. **Methodological Delta**: Does the new dataset introduce a collection, annotation, or generation approach not already supported by prior work?
+3. **Coverage/Scale Delta**: Does the dataset add materially new scale, diversity, or language coverage beyond prior support?
 
 For each dimension, provide:
-- A brief explanation comparing the new ACUs to the most relevant history ACUs.
-- A score from 0.0 (identical/no novelty) to 1.0 (highly novel/groundbreaking).
+- A brief explanation comparing the new ACUs to the most relevant prior-support ACUs.
+- A score from 0.0 (fully supported / no added information) to 1.0 (substantial added information).
 
-Finally, calculate the `average_novelty_score` as the mean of the three dimension scores.
+Finally, calculate the `average_added_information_score` as the mean of the three dimension scores. Also copy the same value into `average_novelty_score` for backward compatibility.
 
 NEW DATASET ACUS:
 {new_acus_text}
 
-HISTORY ACUS (Prior Work Context):
+PRIOR SUPPORT ACUS:
 {history_acus_text}
 """
 
-class NoveltyAnalyzer:
+class AddedInformationAnalyzer:
     def __init__(
         self,
         llm_model_name: str | None = None,
@@ -168,7 +168,7 @@ class NoveltyAnalyzer:
         load_models()
         self.llm_evaluator = None
         if llm_model_name:
-            self.llm_evaluator = LlmNoveltyEvaluator(
+            self.llm_evaluator = LlmAddedInformationEvaluator(
                 model_name=llm_model_name,
                 backend=llm_backend,
                 backend_params=llm_backend_params,
@@ -186,10 +186,10 @@ class NoveltyAnalyzer:
         else:
             self.history_embeddings = np.vstack([self.history_embeddings, new_embeddings])
             
-    def calculate_novelty_score_nli(self, new_acus: List[str], forced_context: List[str] = None) -> float:
+    def calculate_added_information_score_nli(self, new_acus: List[str], forced_context: List[str] = None) -> float:
         """
-        Check if new_acus are entailed by history OR forced_context using NLI cross-encoder.
-        Returns a score 0.0 (Not Novel) to 1.0 (Highly Novel).
+        Estimate the fraction of ACU content not supported by history OR forced_context using NLI.
+        Returns a score 0.0 (fully supported) to 1.0 (substantial added information).
         """
         if not new_acus:
             return 0.0
@@ -225,7 +225,7 @@ class NoveltyAnalyzer:
                 candidate_premises.append(self.history_acus[corpus_id])
             
             if not candidate_premises:
-                # No history and no forced context -> Novel
+                # No history and no forced context -> substantial added information
                 entailment_scores.append(1.0)
                 continue
                 
@@ -246,15 +246,15 @@ class NoveltyAnalyzer:
             
         return float(np.mean(entailment_scores))
 
-    def calculate_novelty_score_llm(self, new_acus: List[str], forced_context: List[str] = None) -> float:
+    def calculate_added_information_score_llm(self, new_acus: List[str], forced_context: List[str] = None) -> float:
         """
-        Check if new_acus are novel compared to history OR forced_context using an LLM.
-        Returns a score 0.0 (Not Novel) to 1.0 (Highly Novel).
+        Estimate the fraction of ACU content not supported by history OR forced_context using an LLM.
+        Returns a score 0.0 (fully supported) to 1.0 (substantial added information).
         """
         if not new_acus:
             return 0.0
         if self.llm_evaluator is None:
-            raise RuntimeError("LLM novelty evaluator is not configured.")
+            raise RuntimeError("LLM added-information evaluator is not configured.")
             
         # 1. Embed new ACUs
         new_embs = SENTENCE_MODEL.encode(new_acus, convert_to_numpy=True)
@@ -279,8 +279,7 @@ class NoveltyAnalyzer:
         history_acus_list = list(candidate_premises)
         
         try:
-            # Optionally log what's being passed
-            print(f"Calling LLM for Novelty Scoring with {len(new_acus)} new ACUs and {len(history_acus_list)} history ACUs")
+            print(f"Calling LLM for added-information scoring with {len(new_acus)} new ACUs and {len(history_acus_list)} prior-support ACUs")
             eval_res = self.llm_evaluator([
                 {"new_acus": new_acus, "history_acus": history_acus_list}
             ])
@@ -295,14 +294,16 @@ class NoveltyAnalyzer:
             # Since evaluator(..., response_format=...) is used, the returned item might be
             # the Pydantic object itself, OR a dict containing parsed_response_message.
             # Let's handle both dynamically:
-            if hasattr(row_result, "average_novelty_score"):
+            if hasattr(row_result, "average_added_information_score"):
                  result = row_result
-            elif isinstance(row_result, dict) and "average_novelty_score" in row_result:
-                 result = NoveltyScoringResult(**row_result)
+            elif isinstance(row_result, dict) and (
+                "average_added_information_score" in row_result or "average_novelty_score" in row_result
+            ):
+                 result = AddedInformationScoringResult(**row_result)
             elif isinstance(row_result, dict) and "parsed_response_message" in row_result:
                  result = row_result["parsed_response_message"]
                  if isinstance(result, dict):
-                     result = NoveltyScoringResult(**result)
+                     result = AddedInformationScoringResult(**result)
             else:
                  print(f"Unrecognized response format: {type(row_result)}")
                  return 0.0
@@ -310,26 +311,41 @@ class NoveltyAnalyzer:
             # (Optional) Log the detailed dimensions
             for dim in result.dimensions:
                 print(f" - [{dim.dimension_name} ({dim.score:.2f})]: {dim.explanation}")
-            print(f" - Average Score: {result.average_novelty_score:.2f}")
+            score = result.average_added_information_score
+            if score is None and result.average_novelty_score is not None:
+                score = result.average_novelty_score
+            print(f" - Average Score: {score:.2f}")
             
-            return result.average_novelty_score
+            return float(score)
         except Exception as e:
-            print(f"Error evaluating novelty with LLM: {e}")
+            print(f"Error evaluating added information with LLM: {e}")
             return 0.0
 
-def analyze_novelty_and_get_score(dataset: DatasetScvInfo, analyzer: NoveltyAnalyzer, forced_context: List[str] = None, method: str = 'llm') -> float:
+def analyze_added_information_and_get_score(
+    dataset: DatasetScvInfo,
+    analyzer: AddedInformationAnalyzer,
+    forced_context: List[str] = None,
+    method: str = 'llm',
+) -> float:
     if not dataset.is_introduced:
         return 0.0
     
     if method == 'nli':
-        return analyzer.calculate_novelty_score_nli(dataset.acus, forced_context=forced_context)
+        return analyzer.calculate_added_information_score_nli(dataset.acus, forced_context=forced_context)
     else:
-        return analyzer.calculate_novelty_score_llm(dataset.acus, forced_context=forced_context)
+        return analyzer.calculate_added_information_score_llm(dataset.acus, forced_context=forced_context)
 
-def construct_scv(novelty: float, diversity: float, quality: float) -> Dict[str, float]:
+def construct_scv(added_information: float, diversity: float, quality: float) -> Dict[str, float]:
     """Step 6: Construct SCV."""
     return {
-        "novelty": novelty,
+        "added_information": added_information,
+        "novelty": added_information,
         "diversity": diversity,
         "quality": quality,
     }
+
+
+# Backward-compatible aliases used elsewhere in the repo.
+NoveltyAnalyzer = AddedInformationAnalyzer
+LlmNoveltyEvaluator = LlmAddedInformationEvaluator
+analyze_novelty_and_get_score = analyze_added_information_and_get_score

@@ -44,8 +44,9 @@ Instructions:
         - **Availability URL**: Look for GitHub, HuggingFace, or project links.
         - **Documentation**: Datasheets, Readmes mentioned?
         - Maintenance: Any maintenance plan mentioned?
-    - **Novelty (Crucial)**: If the dataset is NEW (introduced here):
-        - `novelty_summary`: A concise statement of what is new.
+    - **Added Information (Crucial)**: If the dataset is NEW (introduced here):
+        - `added_information_summary`: A concise statement of what new information this dataset adds relative to prior work.
+        - `novelty_summary`: Mirror of `added_information_summary` for backward compatibility.
         - `acus`: List of Atomic Content Units. Break information into extremely granular, short, independent sentences. Each ACU must contain only ONE single, simple fact. Avoid compound sentences and conjunctions (e.g., break "Data and code are released on GitHub" into "Data is released on GitHub." and "Code is released on GitHub.").
         - `previous_work_acus`: Extract 3-5 ACUs of relevant PREVIOUS WORK mentioned in the text (e.g. "Previous Dataset Y only covered English.", "Dataset Z used heuristic filtering."). This helps in comparing the new contribution.
     - **Transparency Issues**: Note if links/license/provenance are missing.

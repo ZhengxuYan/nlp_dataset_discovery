@@ -1,9 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
-from typing import List, Optional
-from pydantic import BaseModel, Field
-
 class DatasetSize(BaseModel):
     size_str: str = Field(description="Original text describing size (e.g. '10k examples').", default="Unknown")
     num_samples: Optional[int] = Field(description="Estimated number of samples as an integer. -1 if unknown.", default=None)
@@ -36,8 +33,15 @@ class DatasetScvInfo(BaseModel):
     documentation_type: str = Field(description="Type of documentation mentioned (e.g. 'Datasheet', 'Readme', 'Appendix', 'None').", default="None")
     maintenance_status: str = Field(description="Any mention of maintenance plan? ('Yes', 'No', 'Unknown').", default="Unknown")
     
-    # Novelty & Contribution (Only if introduced)
-    novelty_summary: str = Field(description="Short statement summarizing what is new about this dataset. 'None' if not introduced.", default="None")
+    # Added Information & Contribution (Only if introduced)
+    added_information_summary: str = Field(
+        description="Short statement summarizing what new information this dataset adds relative to prior work. 'None' if not introduced.",
+        default="None",
+    )
+    novelty_summary: str = Field(
+        description="Legacy alias for added_information_summary. 'None' if not introduced.",
+        default="None",
+    )
     acus: List[str] = Field(description="Atomic Content Units: Decomposed short claims about the dataset's contribution. Empty if not introduced.", default=[])
     previous_work_acus: List[str] = Field(description="ACUs of previous work mentioned in the paper. Extract 3-5 key claims/facts about prior datasets/methods if mentioned.", default=[])
 
@@ -61,11 +65,19 @@ class ScvPaperAnalysis(BaseModel):
     
     datasets: List[DatasetScvInfo] = Field(description="List of datasets explicitly named and used/introduced.", default=[])
 
-class NoveltyScoreDimension(BaseModel):
-    dimension_name: str = Field(description="Name of the dimension (e.g., Task/Domain, Methodology, Data Scale).")
-    explanation: str = Field(description="Explanation of the score comparing the new dataset to the history.")
-    score: float = Field(description="Score between 0.0 (not novel at all) and 1.0 (highly novel).")
+class AddedInformationScoreDimension(BaseModel):
+    dimension_name: str = Field(description="Name of the dimension (e.g., Task/Domain Delta, Methodology Delta, Coverage Delta).")
+    explanation: str = Field(description="Explanation of the score comparing the new dataset to prior support.")
+    score: float = Field(description="Score between 0.0 (fully supported by prior work) and 1.0 (substantial added information).")
 
-class NoveltyScoringResult(BaseModel):
-    dimensions: List[NoveltyScoreDimension] = Field(description="Scoring along different dimensions (Task/Domain, Methodology, Scale).")
-    average_novelty_score: float = Field(description="The average of the scores across all dimensions, representing the final novelty score.")
+class AddedInformationScoringResult(BaseModel):
+    dimensions: List[AddedInformationScoreDimension] = Field(
+        description="Scoring along different dimensions (Task/Domain Delta, Methodology Delta, Coverage Delta)."
+    )
+    average_added_information_score: float = Field(
+        description="The average of the scores across all dimensions, representing the final added-information score."
+    )
+    average_novelty_score: Optional[float] = Field(
+        description="Legacy alias for average_added_information_score.",
+        default=None,
+    )

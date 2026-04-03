@@ -11,9 +11,9 @@ from .analysis import (
     compute_embeddings, 
     calculate_diversity_score, 
     calculate_quality_score, 
-    analyze_novelty_and_get_score, 
+    analyze_added_information_and_get_score, 
     construct_scv, 
-    NoveltyAnalyzer
+    AddedInformationAnalyzer
 )
 
 TEMP_DIR = 'data/temp_scv'
@@ -251,7 +251,7 @@ def run_analysis_stage(
     novelty_backend: Optional[str] = None,
     novelty_backend_params: Optional[Dict] = None
 ):
-    """Stage 2: Sort, Analyze Novelty against history, Compute SCV."""
+    """Stage 2: Sort, analyze added information against history, compute SCV."""
     
     if not os.path.exists(input_file):
         print(f"Input file {input_file} not found.")
@@ -277,19 +277,19 @@ def run_analysis_stage(
     print(f"[Analysis] Sorted {len(records)} records by date.")
     
     # Init Analyzer
-    analyzer = NoveltyAnalyzer(
+    analyzer = AddedInformationAnalyzer(
         llm_model_name=novelty_model_name,
         llm_backend=novelty_backend,
         llm_backend_params=novelty_backend_params
     )
     if analyzer.llm_evaluator:
-        print(f"[Analysis] LLM novelty scorer: {novelty_model_name} via {novelty_backend or 'default'}")
+        print(f"[Analysis] LLM added-information scorer: {novelty_model_name} via {novelty_backend or 'default'}")
     else:
-        print("[Analysis] No LLM novelty scorer configured. Falling back to NLI for SCV novelty.")
+        print("[Analysis] No LLM added-information scorer configured. Falling back to NLI.")
     
     results = []
     
-    for rec in tqdm(records, desc="Analyzing Novelty"):
+    for rec in tqdm(records, desc="Analyzing Added Information"):
         datasets = rec.get('datasets', [])
         
         # Hydrate
@@ -328,15 +328,16 @@ def run_analysis_stage(
             if ds.previous_work_acus:
                 analyzer.add_acus(ds.previous_work_acus)
 
-            # Check novelty against history AND explicitly against previous_work_acus (Forced Context)
-            nov_score_nli = analyze_novelty_and_get_score(ds, analyzer, forced_context=ds.previous_work_acus, method='nli')
+            # Check added information against history AND explicitly against previous_work_acus (forced prior support).
+            added_score_nli = analyze_added_information_and_get_score(ds, analyzer, forced_context=ds.previous_work_acus, method='nli')
             if analyzer.llm_evaluator:
-                nov_score_llm = analyze_novelty_and_get_score(ds, analyzer, forced_context=ds.previous_work_acus, method='llm')
+                added_score_llm = analyze_added_information_and_get_score(ds, analyzer, forced_context=ds.previous_work_acus, method='llm')
             else:
-                nov_score_llm = nov_score_nli
+                added_score_llm = added_score_nli
             
-            scv = construct_scv(nov_score_llm, div_score, qual_score)
-            scv['novelty_nli'] = nov_score_nli
+            scv = construct_scv(added_score_llm, div_score, qual_score)
+            scv['added_information_nli'] = added_score_nli
+            scv['novelty_nli'] = added_score_nli
             
             # Update History with CURRENT paper's ACUs
             if ds.acus:
