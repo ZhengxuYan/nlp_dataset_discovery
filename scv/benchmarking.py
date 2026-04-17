@@ -5,6 +5,11 @@ from dataclasses import dataclass
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
+from numpy.linalg import norm
+try:
+    import torch
+except ImportError:
+    torch = None  # type: ignore
 
 from .analysis import SENTENCE_MODEL, load_models
 
@@ -13,6 +18,18 @@ try:
     HAS_BM25 = True
 except ImportError:
     HAS_BM25 = False
+
+try:
+    from sentence_transformers import SparseEncoder
+    HAS_SPARSE_ENCODER = True
+except ImportError:
+    SparseEncoder = None  # type: ignore
+    HAS_SPARSE_ENCODER = False
+
+try:
+    from sentence_transformers import SentenceTransformer
+except ImportError:
+    SentenceTransformer = None  # type: ignore
 
 
 ORDINAL_LABELS = ["repackaging", "incremental", "substantial"]
@@ -84,6 +101,22 @@ class CandidateRecord:
 
 class HybridSupportRetriever:
     """Hybrid retriever over dataset candidates with a corpus-aware genericness penalty."""
+    _GLOBAL_SPLADE_MODEL = None
+    _GLOBAL_SENTENCE_MODEL = None
+    DEBUG_COUNTERS: Dict[str, int] = {
+        "splade_real": 0,
+        "splade_fallback_lexical": 0,
+        "splade_unavailable_no_sparse_encoder": 0,
+        "splade_unavailable_model_init_failed": 0,
+        "splade_unavailable_no_doc_embeddings": 0,
+        "splade_exception_runtime": 0,
+        "colbert_real": 0,
+        "colbert_fallback_dense": 0,
+        "colbert_early_empty_query_or_corpus": 0,
+    }
+    _SPLADE_ERROR_PRINTED = False
+    _SPLADE_INIT_ERROR_PRINTED = False
+    _SENTENCE_MODEL_ERROR_PRINTED = False
 
     def __init__(self, candidates: Sequence[CandidateRecord]):
         load_models()
@@ -91,6 +124,8 @@ class HybridSupportRetriever:
         self.acu_to_candidate: List[str] = []
         self.acu_texts: List[str] = []
         self.candidate_lookup = {candidate.candidate_id: candidate for candidate in self.candidates}
+        self._splade_model = None
+        self._splade_doc_embeddings = None
 
         for candidate in self.candidates:
             if candidate.acus:
@@ -102,8 +137,9 @@ class HybridSupportRetriever:
                 self.acu_to_candidate.append(candidate.candidate_id)
 
         self.acu_embeddings = None
-        if self.acu_texts and SENTENCE_MODEL is not None:
-            self.acu_embeddings = SENTENCE_MODEL.encode(self.acu_texts, convert_to_numpy=True)
+        sentence_model = self._get_sentence_model()
+        if self.acu_texts and sentence_model is not None:
+            self.acu_embeddings = sentence_model.encode(self.acu_texts, convert_to_numpy=True)
 
         self.tokenized_corpus = [tokenize(candidate.summary_text) for candidate in self.candidates]
         self.bm25 = BM25Okapi(self.tokenized_corpus) if HAS_BM25 and self.tokenized_corpus else None
@@ -121,12 +157,62 @@ class HybridSupportRetriever:
             avg_df = safe_mean([token_document_frequency[token] / corpus_size for token in set(tokens)])
             self.genericness[candidate.candidate_id] = avg_df
 
+    def _ensure_splade(self) -> None:
+        if not HAS_SPARSE_ENCODER:
+            HybridSupportRetriever.DEBUG_COUNTERS["splade_unavailable_no_sparse_encoder"] += 1
+            return
+        if HybridSupportRetriever._GLOBAL_SPLADE_MODEL is None:
+            try:
+                HybridSupportRetriever._GLOBAL_SPLADE_MODEL = SparseEncoder("naver/splade-cocondenser-ensembledistil")
+            except Exception as exc:
+                HybridSupportRetriever._GLOBAL_SPLADE_MODEL = None
+                HybridSupportRetriever.DEBUG_COUNTERS["splade_unavailable_model_init_failed"] += 1
+                if not HybridSupportRetriever._SPLADE_INIT_ERROR_PRINTED:
+                    print(f"[SPLADE init failed] {exc}")
+                    HybridSupportRetriever._SPLADE_INIT_ERROR_PRINTED = True
+                return
+        try:
+            self._splade_model = HybridSupportRetriever._GLOBAL_SPLADE_MODEL
+            if self.candidates:
+                self._splade_doc_embeddings = self._splade_model.encode_document(
+                    [candidate.summary_text for candidate in self.candidates]
+                )
+        except Exception:
+            self._splade_model = None
+            self._splade_doc_embeddings = None
+            HybridSupportRetriever.DEBUG_COUNTERS["splade_unavailable_no_doc_embeddings"] += 1
+
+    def _get_sentence_model(self):
+        if SENTENCE_MODEL is not None:
+            return SENTENCE_MODEL
+        if HybridSupportRetriever._GLOBAL_SENTENCE_MODEL is not None:
+            return HybridSupportRetriever._GLOBAL_SENTENCE_MODEL
+        if SentenceTransformer is None:
+            return None
+        try:
+            HybridSupportRetriever._GLOBAL_SENTENCE_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
+            return HybridSupportRetriever._GLOBAL_SENTENCE_MODEL
+        except Exception as exc:
+            if not HybridSupportRetriever._SENTENCE_MODEL_ERROR_PRINTED:
+                print(f"[Dense/ColBERT disabled] Failed to load fallback sentence model: {exc}")
+                HybridSupportRetriever._SENTENCE_MODEL_ERROR_PRINTED = True
+            return None
+
+    @staticmethod
+    def _to_numpy(array_like) -> np.ndarray:
+        if torch is not None and isinstance(array_like, torch.Tensor):
+            return array_like.detach().cpu().numpy()
+        if hasattr(array_like, "toarray"):
+            return array_like.toarray()
+        return np.asarray(array_like)
+
     def _dense_scores(self, query_acus: Sequence[str], top_k: int = 20) -> Dict[str, float]:
-        if not query_acus or self.acu_embeddings is None or SENTENCE_MODEL is None:
+        sentence_model = self._get_sentence_model()
+        if not query_acus or self.acu_embeddings is None or sentence_model is None:
             return {}
         from sentence_transformers import util
 
-        query_embeddings = SENTENCE_MODEL.encode(list(query_acus), convert_to_numpy=True)
+        query_embeddings = sentence_model.encode(list(query_acus), convert_to_numpy=True)
         hits = util.semantic_search(query_embeddings, self.acu_embeddings, top_k=min(top_k, len(self.acu_texts)))
         scores: Dict[str, float] = defaultdict(float)
         for query_hits in hits:
@@ -147,6 +233,100 @@ class HybridSupportRetriever:
             for candidate, score in zip(self.candidates, raw_scores)
             if score > 0
         }
+
+    def _splade_scores(self, query_text: str) -> Dict[str, float]:
+        if not query_text.strip():
+            return {}
+        self._ensure_splade()
+        if self._splade_model is None or self._splade_doc_embeddings is None:
+            HybridSupportRetriever.DEBUG_COUNTERS["splade_unavailable_no_doc_embeddings"] += 1
+            HybridSupportRetriever.DEBUG_COUNTERS["splade_fallback_lexical"] += 1
+            return self._lexical_scores(query_text)
+        if self._splade_model is not None and self._splade_doc_embeddings is not None:
+            try:
+                query_embedding = self._splade_model.encode_query([query_text])
+                # Use SparseEncoder similarity API to handle sparse tensor internals safely.
+                sim = self._splade_model.similarity(query_embedding, self._splade_doc_embeddings)
+                scores = self._to_numpy(sim).reshape(-1)
+                HybridSupportRetriever.DEBUG_COUNTERS["splade_real"] += 1
+                return {
+                    candidate.candidate_id: float(score)
+                    for candidate, score in zip(self.candidates, scores)
+                    if score > 0
+                }
+            except Exception as exc:
+                HybridSupportRetriever.DEBUG_COUNTERS["splade_exception_runtime"] += 1
+                if not HybridSupportRetriever._SPLADE_ERROR_PRINTED:
+                    print(f"[SPLADE fallback] Real SPLADE scoring failed once with: {exc}")
+                    HybridSupportRetriever._SPLADE_ERROR_PRINTED = True
+                pass
+        # Fallback: use lexical scores as a sparse baseline when SPLADE is unavailable.
+        HybridSupportRetriever.DEBUG_COUNTERS["splade_fallback_lexical"] += 1
+        return self._lexical_scores(query_text)
+
+    def _colbert_scores(self, query_acus: Sequence[str]) -> Dict[str, float]:
+        sentence_model = self._get_sentence_model()
+        if not query_acus or sentence_model is None or not self.acu_texts:
+            HybridSupportRetriever.DEBUG_COUNTERS["colbert_early_empty_query_or_corpus"] += 1
+            return {}
+        try:
+            query_tokens = sentence_model.encode(
+                list(query_acus),
+                output_value="token_embeddings",
+                convert_to_numpy=True,
+            )
+            doc_tokens = sentence_model.encode(
+                self.acu_texts,
+                output_value="token_embeddings",
+                convert_to_numpy=True,
+            )
+        except Exception:
+            # Fallback: dense retriever when token-level embeddings are unavailable.
+            HybridSupportRetriever.DEBUG_COUNTERS["colbert_fallback_dense"] += 1
+            return self._dense_scores(query_acus)
+
+        acu_scores: Dict[int, float] = defaultdict(float)
+        for query_matrix in query_tokens:
+            q = self._to_numpy(query_matrix).astype(float, copy=False)
+            if q.size == 0:
+                continue
+            q_norm = norm(q, axis=1, keepdims=True)
+            q_norm[q_norm == 0] = 1.0
+            q = q / q_norm
+
+            for idx, doc_matrix in enumerate(doc_tokens):
+                d = self._to_numpy(doc_matrix).astype(float, copy=False)
+                if d.size == 0:
+                    continue
+                d_norm = norm(d, axis=1, keepdims=True)
+                d_norm[d_norm == 0] = 1.0
+                d = d / d_norm
+                # ColBERT-style MaxSim: sum over query tokens of max cosine similarity to doc tokens.
+                maxsim = (q @ d.T).max(axis=1)
+                acu_scores[idx] += float(np.sum(maxsim))
+
+        scores: Dict[str, float] = defaultdict(float)
+        for acu_idx, score in acu_scores.items():
+            candidate_id = self.acu_to_candidate[acu_idx]
+            scores[candidate_id] += score
+        HybridSupportRetriever.DEBUG_COUNTERS["colbert_real"] += 1
+        return dict(scores)
+
+    @classmethod
+    def get_debug_counters(cls) -> Dict[str, int]:
+        return dict(cls.DEBUG_COUNTERS)
+
+    @classmethod
+    def reset_debug_counters(cls) -> None:
+        for key in cls.DEBUG_COUNTERS:
+            cls.DEBUG_COUNTERS[key] = 0
+
+    def _rrf_fusion(self, ranked_lists: Sequence[List[str]], k: int = 60) -> Dict[str, float]:
+        fused: Dict[str, float] = defaultdict(float)
+        for ranked in ranked_lists:
+            for rank, candidate_id in enumerate(ranked, start=1):
+                fused[candidate_id] += 1.0 / (k + rank)
+        return dict(fused)
 
     @staticmethod
     def _normalize(scores: Dict[str, float]) -> Dict[str, float]:
@@ -173,9 +353,20 @@ class HybridSupportRetriever:
             query_metadata.get("role", ""),
             query_metadata.get("source_dataset", ""),
         ])
+        query_acus_for_semantic = list(query_acus)
+        if not query_acus_for_semantic and query_name:
+            # Legacy benchmark rows can have empty ACUs; keep semantic retrievers active.
+            query_acus_for_semantic = [query_name]
 
-        dense = self._normalize(self._dense_scores(query_acus))
+        dense = self._normalize(self._dense_scores(query_acus_for_semantic))
         lexical = self._normalize(self._lexical_scores(query_text))
+        splade = self._normalize(self._splade_scores(query_text))
+        colbert = self._normalize(self._colbert_scores(query_acus_for_semantic))
+        dense_ranked = [candidate_id for candidate_id, _ in sorted(dense.items(), key=lambda item: item[1], reverse=True)]
+        lexical_ranked = [candidate_id for candidate_id, _ in sorted(lexical.items(), key=lambda item: item[1], reverse=True)]
+        splade_ranked = [candidate_id for candidate_id, _ in sorted(splade.items(), key=lambda item: item[1], reverse=True)]
+        colbert_ranked = [candidate_id for candidate_id, _ in sorted(colbert.items(), key=lambda item: item[1], reverse=True)]
+        rank_fusion = self._normalize(self._rrf_fusion([dense_ranked, lexical_ranked, splade_ranked, colbert_ranked]))
 
         query_domain = (query_metadata.get("domain") or "").strip().lower()
         query_role = (query_metadata.get("role") or "").strip().lower()
@@ -185,6 +376,9 @@ class HybridSupportRetriever:
         for candidate in self.candidates:
             dense_score = dense.get(candidate.candidate_id, 0.0)
             lexical_score = lexical.get(candidate.candidate_id, 0.0)
+            splade_score = splade.get(candidate.candidate_id, 0.0)
+            colbert_score = colbert.get(candidate.candidate_id, 0.0)
+            rank_fusion_score = rank_fusion.get(candidate.candidate_id, 0.0)
             metadata_bonus = 0.0
             if query_domain and query_domain == candidate.domain.strip().lower():
                 metadata_bonus += 0.12
@@ -201,15 +395,33 @@ class HybridSupportRetriever:
                 total = dense_score
             elif method == "lexical":
                 total = lexical_score
+            elif method == "splade":
+                total = splade_score
+            elif method == "colbert":
+                total = colbert_score
+            elif method == "rank_fusion":
+                total = rank_fusion_score
             elif method == "fusion":
                 total = 0.6 * dense_score + 0.4 * lexical_score
             else:
-                total = (0.5 * dense_score) + (0.25 * lexical_score) + metadata_bonus + citation_bonus - genericness_penalty
+                total = (
+                    (0.3 * dense_score)
+                    + (0.2 * lexical_score)
+                    + (0.2 * splade_score)
+                    + (0.2 * colbert_score)
+                    + (0.1 * rank_fusion_score)
+                    + metadata_bonus
+                    + citation_bonus
+                    - genericness_penalty
+                )
 
             merged_scores[candidate.candidate_id] = {
                 "score": total,
                 "dense": dense_score,
                 "lexical": lexical_score,
+                "splade": splade_score,
+                "colbert": colbert_score,
+                "rank_fusion": rank_fusion_score,
                 "metadata_bonus": metadata_bonus,
                 "citation_bonus": citation_bonus,
                 "genericness_penalty": genericness_penalty,

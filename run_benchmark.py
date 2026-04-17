@@ -141,7 +141,8 @@ def print_metric_block(title: str, metrics: Dict[str, float]) -> None:
 
 
 def run_retrieval_eval(rows: List[Dict], pool_mode: str, top_k: int) -> Dict[str, Dict[str, float]]:
-    methods = ["dense", "lexical", "fusion", "hybrid_rerank"]
+    methods = ["dense", "lexical", "splade", "colbert", "rank_fusion", "fusion", "hybrid_rerank"]
+    HybridSupportRetriever.reset_debug_counters()
     all_results: Dict[str, List[Dict[str, float]]] = {method: [] for method in methods}
 
     for row in rows:
@@ -165,6 +166,15 @@ def run_retrieval_eval(rows: List[Dict], pool_mode: str, top_k: int) -> Dict[str
             all_results[method].append(metrics)
 
     return {method: summarize_metric_runs(rows) for method, rows in all_results.items() if rows}
+
+
+def print_retrieval_debug_info() -> None:
+    counters = HybridSupportRetriever.get_debug_counters()
+    print("\n" + "=" * 42)
+    print("Retrieval Debug Counters")
+    print("=" * 42)
+    for key, value in counters.items():
+        print(f"{key}: {value}")
 
 
 def run_added_information_eval(
@@ -279,6 +289,7 @@ def main() -> None:
         retrieval_results = run_retrieval_eval(rows, pool_mode=args.pool, top_k=args.top_k)
         for method, metrics in retrieval_results.items():
             print_metric_block(f"Retrieval: {method}", metrics)
+        print_retrieval_debug_info()
 
     if not args.skip_added_information:
         llm_model = args.llm_model if os.environ.get("OPENAI_API_KEY") else None

@@ -1,0 +1,29 @@
+numpy
+pandas
+requests
+python-dotenv
+tqdm
+pydantic
+pypdf
+datasets
+pyarrow
+
+# LLM extraction/evaluation
+# NOTE: `bespokelabs-curator` can pull `vllm`, which may fail on some macOS/Python combos.
+# Install it separately only if you need extraction or LLM judging:
+#   pip install "bespokelabs-curator"
+
+# Retrieval + embedding stack (dense, SPLADE, ColBERT-style late interaction)
+torch
+sentence-transformers
+rank-bm25
+
+# Visualization / analysis scripts
+matplotlib
+seaborn
+scikit-learn
+
+# Scrapers
+scrapy
+scrapy-splash
+itemadapter

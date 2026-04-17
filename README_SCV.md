@@ -127,6 +127,9 @@ Implemented retrieval ablations:
 
 - `dense`
 - `lexical`
+- `splade`
+- `colbert`
+- `rank_fusion`
 - `fusion`
 - `hybrid_rerank`
 
