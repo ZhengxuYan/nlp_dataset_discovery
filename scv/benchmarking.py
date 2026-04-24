@@ -11,7 +11,7 @@ try:
 except ImportError:
     torch = None  # type: ignore
 
-from .analysis import SENTENCE_MODEL, load_models
+from .analysis import SENTENCE_MODEL
 
 try:
     from rank_bm25 import BM25Okapi
@@ -119,7 +119,6 @@ class HybridSupportRetriever:
     _SENTENCE_MODEL_ERROR_PRINTED = False
 
     def __init__(self, candidates: Sequence[CandidateRecord]):
-        load_models()
         self.candidates = list(candidates)
         self.acu_to_candidate: List[str] = []
         self.acu_texts: List[str] = []
