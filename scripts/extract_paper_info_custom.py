@@ -244,7 +244,7 @@ def get_text_from_pdf(pdf_path):
         print(f"Error extracting text from PDF {pdf_path}: {e}")
         return ""
 
-def process_papers(limit=None, model_name="gpt-5-mini", backend=None, backend_params=None, overwrite=False):
+def process_papers(limit=None, model_name="gpt-5.4", backend=None, backend_params=None, overwrite=False):
     ensure_dir(TEMP_DIR)
     
     if overwrite and os.path.exists(OUTPUT_FILE):
@@ -408,7 +408,7 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract and analyze dataset papers.")
     parser.add_argument("--limit", type=int, default=None, help="Limit the number of papers to process.")
-    parser.add_argument("--model", type=str, default="gpt-5-mini", help="Model name to use for analysis (default: gpt-5-mini).")
+    parser.add_argument("--model", type=str, default="gpt-5.4", help="Model name to use for analysis (default: gpt-5.4).")
     parser.add_argument("--backend", type=str, default=None, help="Backend to use (e.g., litellm, openai). Defaults to None (or env BACKEND).")
     parser.add_argument("--backend-params", type=str, default=None, help="JSON string for backend parameters.")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite the output file and start from scratch (process the first N papers again).")

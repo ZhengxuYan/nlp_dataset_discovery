@@ -29,7 +29,7 @@ python scripts/run_scv.py --stage extract --limit 200 --output data/processed/sc
 **What it does:**
 - Reads input CSV (default: `data/processed/arxiv_nlp_conf_papers_2023_2025.csv`).
 - Downloads PDF/Source for each paper.
-- Uses `gpt-5-mini` to extract:
+- Uses `gpt-5.4` to extract:
     - Dataset metadata (Name, Usage, Tasks, Languages, Size, etc.).
     - **Added-Information Claims**: "Atomic Content Units" (ACUs) - short claims about what the dataset adds.
 - Computes `SPECTER2` embeddings for the paper abstract.
@@ -61,7 +61,7 @@ python scripts/run_scv.py --stage analyze --input data/processed/scv_intermediat
 ## Configuration
 
 - **Models**:
-    - Extraction: `gpt-5-mini` (via Curator).
+    - Extraction: `gpt-5.4` (via Curator).
     - Embedding: `allenai/specter2_base`.
     - NLI: `cross-encoder/nli-deberta-v3-small`.
 - **Paths**: Defined in `scripts/scv_pipeline.py` (modifiable via arguments or code constants).
@@ -138,3 +138,57 @@ Implemented evaluation splits:
 - retrieval quality
 - oracle prior support
 - end-to-end prior support + added-information estimation
+
+## Human-in-the-Loop Benchmark Builder
+
+This repo now includes a local workflow for building a real prior-work benchmark from processed query papers.
+
+JSONL-backed stores:
+
+- `data/benchmark/paper_bank.jsonl`
+- `data/benchmark/processed_bank.jsonl`
+- `data/benchmark/previous_work_candidates.jsonl`
+- `data/benchmark/benchmark_drafts.jsonl`
+
+Recommended CLI flow:
+
+```bash
+python scripts/extract_previous_work_candidates.py --input data/processed/final_scv_200.jsonl
+python scripts/resolve_previous_work_candidates.py
+python scripts/fetch_prior_papers.py
+python scripts/process_prior_papers.py
+python scripts/build_benchmark_drafts.py --queries data/processed/final_scv_200.jsonl
+```
+
+Start the local review API:
+
+```bash
+python scripts/benchmark_builder_server.py --queries data/processed/final_scv_200.jsonl
+```
+
+Then run the frontend from `ui_demo`:
+
+```bash
+cd ui_demo
+npm install
+npm run dev
+```
+
+The UI supports:
+
+- reviewing extracted previous-work candidates
+- triggering resolve / fetch / process / rebuild jobs
+- selecting gold prior papers and negative examples
+- editing and saving benchmark draft labels and notes
+
+For demos only, you can provisionally auto-fill rows:
+
+```bash
+python scripts/autofill_demo_benchmark_rows.py --limit 20
+```
+
+These rows are tagged as machine-generated demo annotations and should not be treated as manually verified gold labels. Remove the demo auto-fill fields with:
+
+```bash
+python scripts/autofill_demo_benchmark_rows.py --remove
+```

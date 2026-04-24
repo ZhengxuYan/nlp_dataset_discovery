@@ -747,7 +747,7 @@ def generate_benchmark(
     input_jsonl: str,
     num_clusters: int,
     max_retries: int = 3,
-    model_name: str = "gpt-5-mini",
+    model_name: str = "gpt-5.4",
     backend: Optional[str] = None,
     backend_params: Optional[Dict] = None
 ):
@@ -844,7 +844,7 @@ if __name__ == "__main__":
     parser.add_argument("--input_jsonl", type=str, default="data/processed/arxiv_nlp_conf_papers_2023_2025_dataset_analysis(gpt-5-mini).jsonl")
     parser.add_argument("--num_clusters", type=int, default=10, help="Number of clusters to generate")
     parser.add_argument("--max_retries", type=int, default=3, help="Per-anchor generation retries before giving up")
-    parser.add_argument("--model", type=str, default="gpt-5-mini", help="LLM model name for benchmark generation.")
+    parser.add_argument("--model", type=str, default="gpt-5.4", help="LLM model name for benchmark generation.")
     parser.add_argument("--backend", type=str, default=None, help="Curator backend, for example `openai` or `litellm`.")
     parser.add_argument("--backend-params", type=str, default=None, help="JSON string for backend parameters.")
     args = parser.parse_args()

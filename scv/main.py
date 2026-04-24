@@ -16,7 +16,7 @@ def main():
     parser.add_argument("--max-retries", type=int, default=3, help="Retries for each failed extraction batch.")
     parser.add_argument("--pdf-workers", type=int, default=4, help="Parallel workers for PDF download/text prep.")
     parser.add_argument("--text-char-limit", type=int, default=16000, help="Maximum paper text characters sent to the extractor.")
-    parser.add_argument("--model", type=str, default="gpt-5-mini", help="LLM model name for extraction.")
+    parser.add_argument("--model", type=str, default="gpt-5.4", help="LLM model name for extraction.")
     parser.add_argument("--backend", type=str, default=None, help="Curator backend, for example `litellm`.")
     parser.add_argument("--backend-params", type=str, default=None, help="JSON string for backend parameters.")
     args = parser.parse_args()

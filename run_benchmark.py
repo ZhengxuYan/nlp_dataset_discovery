@@ -279,7 +279,7 @@ def main() -> None:
     parser.add_argument("--pool", choices=["all", "cited"], default="all")
     parser.add_argument("--skip-retrieval", action="store_true")
     parser.add_argument("--skip-added-information", action="store_true")
-    parser.add_argument("--llm-model", type=str, default="gpt-5-mini")
+    parser.add_argument("--llm-model", type=str, default="gpt-5.4")
     args = parser.parse_args()
 
     rows = normalize_rows(load_benchmark_rows(args.input))

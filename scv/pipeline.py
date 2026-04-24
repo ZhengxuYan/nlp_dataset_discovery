@@ -110,7 +110,7 @@ def run_extraction_stage(
     max_retries: int = 3,
     pdf_workers: int = 4,
     text_char_limit: int = 16000,
-    model_name: str = "gpt-5-mini",
+    model_name: str = "gpt-5.4",
     backend: Optional[str] = None,
     backend_params: Optional[Dict] = None
 ):
