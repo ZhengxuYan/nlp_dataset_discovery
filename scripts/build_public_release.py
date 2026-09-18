@@ -430,8 +430,10 @@ def build_release(output: Path) -> dict[str, Any]:
 
 def create_archive(output: Path) -> Path:
     archive = output.parent / f"{output.name}-{date.today()}.tar.gz"
-    with tarfile.open(archive, "w:gz", format=tarfile.PAX_FORMAT) as handle:
-        handle.add(output, arcname=output.name, filter=lambda info: _normalize_tar(info))
+    with archive.open("wb") as raw:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as zipped:
+            with tarfile.open(fileobj=zipped, mode="w", format=tarfile.PAX_FORMAT) as handle:
+                handle.add(output, arcname=output.name, filter=_normalize_tar)
     return archive
 
 

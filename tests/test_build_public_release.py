@@ -7,6 +7,7 @@ from pathlib import Path
 from scripts.build_public_release import (
     acl_catalog_row,
     arxiv_catalog_row,
+    create_archive,
     sanitize_dataset_row,
     screening_row,
     write_jsonl_gz,
@@ -58,3 +59,12 @@ def test_gzip_writer_is_readable_and_counts_years(tmp_path: Path) -> None:
     assert years == {2020: 1, 2025: 1}
     with gzip.open(path, "rt", encoding="utf-8") as handle:
         assert [json.loads(line) for line in handle] == [{"year": 2020}, {"year": 2025}]
+
+
+def test_archive_is_deterministic(tmp_path: Path) -> None:
+    release = tmp_path / "release"
+    release.mkdir()
+    (release / "file.txt").write_text("content\n", encoding="utf-8")
+    first = create_archive(release).read_bytes()
+    second = create_archive(release).read_bytes()
+    assert first == second
