@@ -1,0 +1,12 @@
+{
+  "rows": 257,
+  "status_counts": {
+    "missing_prior_acus": 157,
+    "complete": 100
+  },
+  "complete_rows": 100,
+  "mean_prior_refs_per_row": 0.5525291828793775,
+  "mean_prior_acus_per_row": 2.4085603112840466,
+  "total_prior_refs_linked": 142,
+  "total_prior_acus_linked": 619
+}

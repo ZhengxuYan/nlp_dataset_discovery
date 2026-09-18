@@ -1,0 +1,36 @@
+{
+  "input_rows": 22133,
+  "papers": 22133,
+  "datasets": 22874,
+  "acus": 77571,
+  "inputs": [
+    "data/census/fulltext_dataset_extractions_pdf_all.jsonl",
+    "data/census/arxiv_fulltext_dataset_extractions_2023_2025.jsonl"
+  ],
+  "source_corpora": [
+    "acl",
+    "arxiv"
+  ],
+  "papers_by_source": {
+    "acl": 10079,
+    "arxiv": 12054
+  },
+  "papers_by_year": {
+    "2023": 4680,
+    "2024": 7390,
+    "2025": 10063
+  },
+  "datasets_by_year": {
+    "2023": 4820,
+    "2024": 7613,
+    "2025": 10441
+  },
+  "acus_by_year": {
+    "2023": 16364,
+    "2024": 25781,
+    "2025": 35426
+  },
+  "output_extractions_jsonl": "data/census/integrated_fulltext_dataset_extractions_2023_2025.jsonl",
+  "output_dataset_bank_jsonl": "data/census/integrated_fulltext_dataset_bank_2023_2025.jsonl",
+  "output_acu_bank_jsonl": "data/census/integrated_fulltext_acu_bank_2023_2025.jsonl"
+}

@@ -1,0 +1,31 @@
+key,count
+Wikipedia,161
+Wikidata,95
+GSM8K,88
+MMLU,60
+MATH,57
+HotpotQA,46
+Natural Questions,37
+Project Gutenberg,36
+Spider,33
+Reddit,32
+SQuAD,32
+PubMed,31
+Alpaca,30
+TruthfulQA,30
+WikiHow,29
+Common Crawl,28
+Visual Genome,27
+HumanEval,27
+TriviaQA,27
+ChartQA,27
+ConceptNet,24
+S2ORC,24
+C4,23
+ShareGPT,23
+SNLI,22
+MedQA,22
+WordNet,22
+XSum,21
+XNLI,21
+IMDB,21

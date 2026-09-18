@@ -103,6 +103,7 @@ class HybridSupportRetriever:
     """Hybrid retriever over dataset candidates with a corpus-aware genericness penalty."""
     _GLOBAL_SPLADE_MODEL = None
     _GLOBAL_SENTENCE_MODEL = None
+    STRICT_EXACT_METHODS = False
     DEBUG_COUNTERS: Dict[str, int] = {
         "splade_real": 0,
         "splade_fallback_lexical": 0,
@@ -159,6 +160,8 @@ class HybridSupportRetriever:
     def _ensure_splade(self) -> None:
         if not HAS_SPARSE_ENCODER:
             HybridSupportRetriever.DEBUG_COUNTERS["splade_unavailable_no_sparse_encoder"] += 1
+            if self.STRICT_EXACT_METHODS:
+                raise RuntimeError("SPLADE exact mode requested, but sentence_transformers.SparseEncoder is unavailable.")
             return
         if HybridSupportRetriever._GLOBAL_SPLADE_MODEL is None:
             try:
@@ -169,6 +172,8 @@ class HybridSupportRetriever:
                 if not HybridSupportRetriever._SPLADE_INIT_ERROR_PRINTED:
                     print(f"[SPLADE init failed] {exc}")
                     HybridSupportRetriever._SPLADE_INIT_ERROR_PRINTED = True
+                if self.STRICT_EXACT_METHODS:
+                    raise RuntimeError(f"SPLADE exact mode requested, but SPLADE model initialization failed: {exc}") from exc
                 return
         try:
             self._splade_model = HybridSupportRetriever._GLOBAL_SPLADE_MODEL
@@ -239,6 +244,8 @@ class HybridSupportRetriever:
         self._ensure_splade()
         if self._splade_model is None or self._splade_doc_embeddings is None:
             HybridSupportRetriever.DEBUG_COUNTERS["splade_unavailable_no_doc_embeddings"] += 1
+            if self.STRICT_EXACT_METHODS:
+                raise RuntimeError("SPLADE exact mode requested, but SPLADE document embeddings are unavailable.")
             HybridSupportRetriever.DEBUG_COUNTERS["splade_fallback_lexical"] += 1
             return self._lexical_scores(query_text)
         if self._splade_model is not None and self._splade_doc_embeddings is not None:
@@ -258,6 +265,8 @@ class HybridSupportRetriever:
                 if not HybridSupportRetriever._SPLADE_ERROR_PRINTED:
                     print(f"[SPLADE fallback] Real SPLADE scoring failed once with: {exc}")
                     HybridSupportRetriever._SPLADE_ERROR_PRINTED = True
+                if self.STRICT_EXACT_METHODS:
+                    raise RuntimeError(f"SPLADE exact scoring failed: {exc}") from exc
                 pass
         # Fallback: use lexical scores as a sparse baseline when SPLADE is unavailable.
         HybridSupportRetriever.DEBUG_COUNTERS["splade_fallback_lexical"] += 1
@@ -267,6 +276,8 @@ class HybridSupportRetriever:
         sentence_model = self._get_sentence_model()
         if not query_acus or sentence_model is None or not self.acu_texts:
             HybridSupportRetriever.DEBUG_COUNTERS["colbert_early_empty_query_or_corpus"] += 1
+            if self.STRICT_EXACT_METHODS:
+                raise RuntimeError("ColBERT exact mode requested, but query/document embeddings are unavailable.")
             return {}
         try:
             query_tokens = sentence_model.encode(
@@ -282,6 +293,8 @@ class HybridSupportRetriever:
         except Exception:
             # Fallback: dense retriever when token-level embeddings are unavailable.
             HybridSupportRetriever.DEBUG_COUNTERS["colbert_fallback_dense"] += 1
+            if self.STRICT_EXACT_METHODS:
+                raise
             return self._dense_scores(query_acus)
 
         acu_scores: Dict[int, float] = defaultdict(float)
@@ -357,15 +370,27 @@ class HybridSupportRetriever:
             # Legacy benchmark rows can have empty ACUs; keep semantic retrievers active.
             query_acus_for_semantic = [query_name]
 
-        dense = self._normalize(self._dense_scores(query_acus_for_semantic))
-        lexical = self._normalize(self._lexical_scores(query_text))
-        splade = self._normalize(self._splade_scores(query_text))
-        colbert = self._normalize(self._colbert_scores(query_acus_for_semantic))
+        dense: Dict[str, float] = {}
+        lexical: Dict[str, float] = {}
+        splade: Dict[str, float] = {}
+        colbert: Dict[str, float] = {}
+
+        if method in {"dense", "fusion", "rank_fusion", "hybrid_rerank"}:
+            dense = self._normalize(self._dense_scores(query_acus_for_semantic))
+        if method in {"lexical", "fusion", "rank_fusion", "hybrid_rerank"}:
+            lexical = self._normalize(self._lexical_scores(query_text))
+        if method in {"splade", "rank_fusion", "hybrid_rerank"}:
+            splade = self._normalize(self._splade_scores(query_text))
+        if method in {"colbert", "rank_fusion", "hybrid_rerank"}:
+            colbert = self._normalize(self._colbert_scores(query_acus_for_semantic))
+
         dense_ranked = [candidate_id for candidate_id, _ in sorted(dense.items(), key=lambda item: item[1], reverse=True)]
         lexical_ranked = [candidate_id for candidate_id, _ in sorted(lexical.items(), key=lambda item: item[1], reverse=True)]
         splade_ranked = [candidate_id for candidate_id, _ in sorted(splade.items(), key=lambda item: item[1], reverse=True)]
         colbert_ranked = [candidate_id for candidate_id, _ in sorted(colbert.items(), key=lambda item: item[1], reverse=True)]
-        rank_fusion = self._normalize(self._rrf_fusion([dense_ranked, lexical_ranked, splade_ranked, colbert_ranked]))
+        rank_fusion = {}
+        if method in {"rank_fusion", "hybrid_rerank"}:
+            rank_fusion = self._normalize(self._rrf_fusion([dense_ranked, lexical_ranked, splade_ranked, colbert_ranked]))
 
         query_domain = (query_metadata.get("domain") or "").strip().lower()
         query_role = (query_metadata.get("role") or "").strip().lower()

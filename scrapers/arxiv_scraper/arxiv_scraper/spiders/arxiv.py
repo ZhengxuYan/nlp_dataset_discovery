@@ -14,6 +14,7 @@ class ArxivSpider(scrapy.Spider):
     sleep_time = 3  # arXiv API recommends 3 seconds between requests
     articles_fetched = 0  # Counter for articles written to CSV
     articles_processed = 0  # Counter for total articles processed (including skipped)
+    failed_requests = 0  # Counter for failed API requests
     start_index = 0  # For pagination
     current_category_index = 0  # Track which CS subcategory we're querying
 
@@ -40,6 +41,24 @@ class ArxivSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super(ArxivSpider, self).__init__(*args, **kwargs)
 
+        categories = kwargs.get("categories")
+        if categories:
+            requested_categories = [
+                category.strip()
+                for category in categories.split(",")
+                if category.strip()
+            ]
+            unknown_categories = [
+                category
+                for category in requested_categories
+                if category not in self.cs_categories
+            ]
+            if unknown_categories:
+                raise ValueError(
+                    f"Unknown arXiv categories: {', '.join(unknown_categories)}"
+                )
+            self.cs_categories = requested_categories
+
         # Use project root data/raw directory for cleaner organization
         project_root = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../../../../")
@@ -47,8 +66,18 @@ class ArxivSpider(scrapy.Spider):
         results_dir = os.path.join(project_root, "data", "raw")
         os.makedirs(results_dir, exist_ok=True)
 
-        # Open file using absolute path to data/raw
-        results_file = os.path.join(results_dir, "arxiv_results_2023_2025.csv")
+        output_file = kwargs.get("output_file")
+        if output_file:
+            results_file = (
+                output_file
+                if os.path.isabs(output_file)
+                else os.path.abspath(os.path.join(project_root, output_file))
+            )
+            os.makedirs(os.path.dirname(results_file), exist_ok=True)
+        else:
+            start_year = str(self.start_date).split("-", 1)[0]
+            end_year = str(self.end_date).split("-", 1)[0]
+            results_file = os.path.join(results_dir, f"arxiv_results_{start_year}_{end_year}.csv")
 
         # Check if file exists and has content to determine if we need header
         file_exists = os.path.exists(results_file) and os.path.getsize(results_file) > 0
@@ -123,8 +152,52 @@ class ArxivSpider(scrapy.Spider):
         yield Request(
             url=self.build_api_url(start_index=0),
             callback=self.parse_api_response,
+            errback=self.handle_api_error,
             meta={"dont_obey_robotstxt": True},
         )
+
+    def next_category_request(self, response_meta=None):
+        """Advance to the next arXiv category and return its first request."""
+        self.current_category_index += 1
+        self.start_index = 0
+
+        if self.current_category_index >= len(self.cs_categories):
+            self.logger.info(
+                f"Finished all {len(self.cs_categories)} categories! "
+                f"Total articles fetched: {self.articles_fetched}; "
+                f"failed API requests: {self.failed_requests}"
+            )
+            return None
+
+        next_category = self.cs_categories[self.current_category_index]
+        self.logger.info(f"Moving to next category: {next_category}")
+        self.logger.info(
+            f"Sleeping for {self.sleep_time} seconds (arXiv API rate limiting)"
+        )
+        time.sleep(self.sleep_time)
+
+        return Request(
+            url=self.build_api_url(start_index=0),
+            callback=self.parse_api_response,
+            errback=self.handle_api_error,
+            meta=response_meta or {"dont_obey_robotstxt": True},
+        )
+
+    def handle_api_error(self, failure):
+        """Record request-level API failures and continue with the next category."""
+        self.failed_requests += 1
+        request = failure.request
+        category = self.cs_categories[self.current_category_index]
+        self.logger.error(
+            "Failed arXiv API request for category=%s start_index=%s url=%s error=%r",
+            category,
+            self.start_index,
+            request.url,
+            failure.value,
+        )
+        next_request = self.next_category_request(request.meta)
+        if next_request is not None:
+            yield next_request
 
     def parse_api_response(self, response):
         """Parse XML response from arXiv API"""
@@ -353,30 +426,11 @@ class ArxivSpider(scrapy.Spider):
             yield Request(
                 url=self.build_api_url(start_index=self.start_index),
                 callback=self.parse_api_response,
+                errback=self.handle_api_error,
                 meta=response.meta,
             )
         else:
             # No entries - move to next category
-            self.current_category_index += 1
-            self.start_index = 0  # Reset start index for new category
-
-            if self.current_category_index >= len(self.cs_categories):
-                # All categories exhausted
-                self.logger.info(
-                    f"Finished all {len(self.cs_categories)} categories! Total articles fetched: {self.articles_fetched}"
-                )
-                return
-
-            # Move to next category
-            next_category = self.cs_categories[self.current_category_index]
-            self.logger.info(f"Finished category, moving to next: {next_category}")
-            self.logger.info(
-                f"Sleeping for {self.sleep_time} seconds (arXiv API rate limiting)"
-            )
-            time.sleep(self.sleep_time)
-
-            yield Request(
-                url=self.build_api_url(start_index=0),
-                callback=self.parse_api_response,
-                meta=response.meta,
-            )
+            next_request = self.next_category_request(response.meta)
+            if next_request is not None:
+                yield next_request

@@ -1,0 +1,54 @@
+{
+  "acl_output_path": "data/processed/acl_2020_2022_dataset_screening_gemini31_flashlite.jsonl",
+  "acl_queue": {
+    "by_year": {
+      "2020": 7087,
+      "2021": 6995,
+      "2022": 8456
+    },
+    "duplicate_ids": 0,
+    "rows": 22538,
+    "rows_with_abstract": 20835,
+    "rows_without_abstract": 1703,
+    "unique_ids": 22538
+  },
+  "acl_queue_path": "data/processed/acl_2020_2022_for_dataset_screening.jsonl",
+  "arxiv_output_path": "data/processed/arxiv_2020_2022_dataset_screening_gemini31_flashlite.jsonl",
+  "arxiv_queue": {
+    "by_year": {
+      "2020": 20233,
+      "2021": 20754,
+      "2022": 23723
+    },
+    "duplicate_ids": 0,
+    "rows": 64710,
+    "rows_with_abstract": 64710,
+    "rows_without_abstract": 0,
+    "unique_ids": 64710
+  },
+  "arxiv_queue_path": "data/processed/arxiv_2020_2022_for_dataset_screening.jsonl",
+  "arxiv_remaining_after_seed": 63210,
+  "arxiv_seed": {
+    "by_year": {
+      "2020": 500,
+      "2021": 500,
+      "2022": 500
+    },
+    "duplicate_ids": 0,
+    "rows": 1500,
+    "rows_with_abstract": 0,
+    "rows_without_abstract": 1500,
+    "unique_ids": 1500
+  },
+  "commands": {
+    "acl": "python scripts/run_dataset_census_classifier.py --catalog data/processed/acl_2020_2022_for_dataset_screening.jsonl --output-jsonl data/processed/acl_2020_2022_dataset_screening_gemini31_flashlite.jsonl --error-jsonl data/processed/acl_2020_2022_dataset_screening_gemini31_flashlite.errors.jsonl --backend gemini --model gemini-3.1-flash-lite --batch-size 10 --workers 2 --max-retries 3 --sleep 0.2",
+    "arxiv": "python scripts/run_dataset_census_classifier.py --catalog data/processed/arxiv_2020_2022_for_dataset_screening.jsonl --output-jsonl data/processed/arxiv_2020_2022_dataset_screening_gemini31_flashlite.jsonl --error-jsonl data/processed/arxiv_2020_2022_dataset_screening_gemini31_flashlite.errors.jsonl --backend gemini --model gemini-3.1-flash-lite --batch-size 10 --workers 2 --max-retries 3 --sleep 0.2"
+  },
+  "generated_at": "2026-09-17T04:45:17+00:00",
+  "incremental_years": [
+    2020,
+    2022
+  ],
+  "pre_2020_prior_bank_required": true,
+  "safe_to_run_attribution_without_pre_2020_prior_bank": false
+}

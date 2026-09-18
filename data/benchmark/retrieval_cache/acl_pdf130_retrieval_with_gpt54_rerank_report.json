@@ -1,0 +1,634 @@
+{
+  "row_counts": {
+    "complete": 100,
+    "processed_corpus": 128
+  },
+  "legacy_label_distribution": {},
+  "retrieval": {
+    "lexical": {
+      "mrr": 0.43809523809523826,
+      "recall@1": 0.33,
+      "recall@10": 0.7,
+      "recall@3": 0.5,
+      "recall@5": 0.61
+    },
+    "dense": {
+      "mrr": 0.4963134920634922,
+      "recall@1": 0.36,
+      "recall@10": 0.81,
+      "recall@3": 0.58,
+      "recall@5": 0.68
+    },
+    "fusion": {
+      "mrr": 0.5602063492063493,
+      "recall@1": 0.43,
+      "recall@10": 0.82,
+      "recall@3": 0.66,
+      "recall@5": 0.75
+    },
+    "gpt_5_4_listwise_rerank": {
+      "mrr": 0.7919285714285715,
+      "recall@1": 0.72,
+      "recall@10": 0.92,
+      "recall@3": 0.87,
+      "recall@5": 0.89
+    }
+  },
+  "miss_examples": {
+    "lexical": [
+      {
+        "query_paper_id": "ACL:2025.acl-long.355::dataset::0::multipref",
+        "query_dataset_name": "MULTIPREF",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-e87ded10dfa033c3-9b84964d8a"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-2d765145cb51dbec-751bf545b3",
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53",
+          "PRIOR:priorref-429632ab9e323aa2-03da74e509",
+          "PRIOR:priorref-7e65f863df515b81-0f9d0cc2dc",
+          "PRIOR:priorref-bcfd91f5bb153147-64fb20f228"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.250::dataset::0::noiserbench",
+        "query_dataset_name": "NoiserBench",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-080b9a1354fbe2fb-65895f8fc5"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-170b300b7aed6098-58ec3689a1",
+          "PRIOR:priorref-ab82b0c259396a5a-4afd0b539e",
+          "PRIOR:priorref-12d00a341ddd3daa-1012ff5f10",
+          "PRIOR:priorref-12c12bce39cf8998-19d8a76932",
+          "PRIOR:priorref-2185b1f0c75502b5-a671a5745f"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.417::dataset::0::self-error-instruct-sei-synthesized-data",
+        "query_dataset_name": "Self-Error-Instruct (SEI) synthesized data",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-315491a25d45c82d-0070a070d2"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-5328c70ea956b9cc-20752d3448",
+          "PRIOR:priorref-be5a5c5e044c281a-9eab4c4653",
+          "PRIOR:priorref-09188d050bf2fcd4-41cc57623c",
+          "PRIOR:priorref-a07d0f409e1fcdce-004af9f29a",
+          "PRIOR:priorref-a4e8118468708994-bf15065571"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-demo.64::dataset::0::value-compass-benchmarks",
+        "query_dataset_name": "Value Compass Benchmarks",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-b8ec6f50fa97c7e2-366cf8b21a",
+          "PRIOR:priorref-d228da24b4a6e4a7-19bad2e507",
+          "PRIOR:priorref-975635c10165ecff-845bb33195",
+          "PRIOR:priorref-24a7c42324d1acaf-362d8b014b",
+          "PRIOR:priorref-2d765145cb51dbec-751bf545b3"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-short.20::dataset::0::judge-bench",
+        "query_dataset_name": "JUDGE-BENCH",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-ad1729c1c21024c6-b96172f36b",
+          "PRIOR:priorref-180601e583f996d5-aa486e2311"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d",
+          "PRIOR:priorref-62fce0637cba516b-b8213d57f5",
+          "PRIOR:priorref-0b71d252dfb854cd-7e16318540",
+          "PRIOR:priorref-c4186310c5e9e9d4-726bd3e412",
+          "PRIOR:priorref-8939960ab270947e-d8a0ee8bb1"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.420::dataset::0::sciver",
+        "query_dataset_name": "SCIVER",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-60ce10f753c145e6-e8adc577de"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-7217d58bc9be4aed-fc6c03b341",
+          "PRIOR:priorref-2711dbc47fef80dd-532fe8e403",
+          "PRIOR:priorref-e4dd9e3a2682489f-d1225c72de",
+          "PRIOR:priorref-16ff4e52042a0045-5988f35115",
+          "PRIOR:priorref-170b300b7aed6098-58ec3689a1"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1207::dataset::0::multi-turn-safety-alignment-dataset",
+        "query_dataset_name": "Multi-turn safety alignment dataset",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-7e5a12d4b6ed4b8b-81e5660059"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-7c3e77ffa2c1e480-a399f9c811",
+          "PRIOR:priorref-429632ab9e323aa2-03da74e509",
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d",
+          "PRIOR:priorref-bc04b9b7fa645073-5bf650f4fd",
+          "PRIOR:priorref-bf7bfc731cd068d1-1090b70865"
+        ]
+      },
+      {
+        "query_paper_id": "2025.acl-short.7::dataset::0::conect",
+        "query_dataset_name": "ConECT",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-25633badfe3003ad-efda8b9f89"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-afca4faffaef0e9b-ee7acfbfae",
+          "PRIOR:priorref-9a84d127cdce134c-1f8f59e302",
+          "PRIOR:priorref-a703f8d7ea8e71f7-9ce07f0396",
+          "PRIOR:priorref-080b9a1354fbe2fb-65895f8fc5",
+          "PRIOR:priorref-7217d58bc9be4aed-fc6c03b341"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.941::dataset::0::chinese-simpleqa",
+        "query_dataset_name": "Chinese SimpleQA",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-9deb19dc3228aa6f-7b3a18cba2"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-42c6bf20763ffe58-171d456950",
+          "PRIOR:priorref-16ff4e52042a0045-5988f35115",
+          "PRIOR:priorref-39460a2e33d02626-b08da1b41e",
+          "PRIOR:priorref-ad1729c1c21024c6-b96172f36b",
+          "PRIOR:priorref-bf7bfc731cd068d1-1090b70865"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.326::dataset::0::mm-upd-bench",
+        "query_dataset_name": "MM-UPD Bench",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-5306ff6725feb5fb-291a20f0af"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-2df868a7b7939447-91d0c549ef",
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d",
+          "PRIOR:priorref-62fce0637cba516b-b8213d57f5",
+          "PRIOR:priorref-0b71d252dfb854cd-7e16318540",
+          "PRIOR:priorref-be5a5c5e044c281a-9eab4c4653"
+        ]
+      }
+    ],
+    "dense": [
+      {
+        "query_paper_id": "ACL:2025.acl-long.355::dataset::0::multipref",
+        "query_dataset_name": "MULTIPREF",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-e87ded10dfa033c3-9b84964d8a"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-5e55eb9879318709-9270ba962c",
+          "PRIOR:priorref-bcfd91f5bb153147-64fb20f228",
+          "PRIOR:priorref-8c4ff4ccefc4d79f-28d55c12e1",
+          "PRIOR:priorref-47340a992080d9fa-326bd234e2",
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.250::dataset::0::noiserbench",
+        "query_dataset_name": "NoiserBench",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-080b9a1354fbe2fb-65895f8fc5"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-12c12bce39cf8998-19d8a76932",
+          "PRIOR:priorref-429632ab9e323aa2-03da74e509",
+          "PRIOR:priorref-170b300b7aed6098-58ec3689a1",
+          "PRIOR:priorref-aa7800fa2fe587e9-97077daec4",
+          "PRIOR:priorref-11724542c2e12e36-97f3452f18"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-short.94::dataset::0::wicked-variants",
+        "query_dataset_name": "WiCkeD variants",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-7431798345410aba-302a0d5071",
+          "PRIOR:priorref-2df868a7b7939447-91d0c549ef",
+          "PRIOR:priorref-0fd897561aeb3606-1cc02e1b8f",
+          "PRIOR:priorref-739675b03802717e-454cd78c3c"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-5e360da1297c0132-ed35eb998b",
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d",
+          "PRIOR:priorref-828e28fa9dff914b-b2d56cd1bc",
+          "PRIOR:priorref-5a2ae42c8e4cc762-6fcb1eef07",
+          "PRIOR:priorref-62fce0637cba516b-b8213d57f5"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.417::dataset::0::self-error-instruct-sei-synthesized-data",
+        "query_dataset_name": "Self-Error-Instruct (SEI) synthesized data",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-315491a25d45c82d-0070a070d2"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-5328c70ea956b9cc-20752d3448",
+          "PRIOR:priorref-a4e8118468708994-bf15065571",
+          "PRIOR:priorref-ce861463d0cbfe6d-54343a78c2",
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53",
+          "PRIOR:priorref-9e8295a6e290a470-1413746893"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-demo.64::dataset::0::value-compass-benchmarks",
+        "query_dataset_name": "Value Compass Benchmarks",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-b8ec6f50fa97c7e2-366cf8b21a",
+          "PRIOR:priorref-975635c10165ecff-845bb33195",
+          "PRIOR:priorref-414b79ca04d0b42e-e37b75d1ed",
+          "PRIOR:priorref-5e55eb9879318709-9270ba962c",
+          "PRIOR:priorref-5306ff6725feb5fb-291a20f0af"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-short.20::dataset::0::judge-bench",
+        "query_dataset_name": "JUDGE-BENCH",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-ad1729c1c21024c6-b96172f36b",
+          "PRIOR:priorref-180601e583f996d5-aa486e2311"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-8939960ab270947e-d8a0ee8bb1",
+          "PRIOR:priorref-62fce0637cba516b-b8213d57f5",
+          "PRIOR:priorref-a65af20ba4777efd-84c56b48ad",
+          "PRIOR:priorref-6bd4dc1614102300-c73727fc34",
+          "PRIOR:priorref-bcb23b746b3393e2-df83f85910"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1172::dataset::0::marco-bench-mif",
+        "query_dataset_name": "Marco-Bench-MIF",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-af5913c5350102d1-9e24bbcb3d"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-afca4faffaef0e9b-ee7acfbfae",
+          "PRIOR:priorref-d103ec936300428e-0a41b60a58",
+          "PRIOR:priorref-b6ce026e353f779a-ad144f7bc8",
+          "PRIOR:priorref-5328c70ea956b9cc-20752d3448",
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1407::dataset::0::a3-wikigraph-qa-sft",
+        "query_dataset_name": "A3-Wikigraph-QA-SFT",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-39460a2e33d02626-b08da1b41e"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-a65af20ba4777efd-84c56b48ad",
+          "PRIOR:priorref-66cf01b47ab5a8bc-7fb1ff10f4",
+          "PRIOR:priorref-f1a23d4ef5119560-c735f461fd",
+          "PRIOR:priorref-c62fb324961fd68d-e72d47bda8",
+          "PRIOR:priorref-bcb23b746b3393e2-df83f85910"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.381::dataset::0::axis",
+        "query_dataset_name": "AXIS",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-b582ecba9e6c2bc4-993d9b9a5c"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-414b79ca04d0b42e-e37b75d1ed",
+          "PRIOR:priorref-8397de9b5b5db678-b82c67bd1c",
+          "PRIOR:priorref-8a8b4ad68ea3069f-cde3b0c38e",
+          "PRIOR:priorref-8d04c54b31c7ebb5-456f27d00e",
+          "PRIOR:priorref-9e9372f4222d5637-6e775eed5f"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.326::dataset::0::mm-upd-bench",
+        "query_dataset_name": "MM-UPD Bench",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-5306ff6725feb5fb-291a20f0af"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-0fd897561aeb3606-1cc02e1b8f",
+          "PRIOR:priorref-62fce0637cba516b-b8213d57f5",
+          "PRIOR:priorref-42c6bf20763ffe58-171d456950",
+          "PRIOR:priorref-2df868a7b7939447-91d0c549ef",
+          "PRIOR:priorref-8d04c54b31c7ebb5-456f27d00e"
+        ]
+      }
+    ],
+    "fusion": [
+      {
+        "query_paper_id": "ACL:2025.acl-long.355::dataset::0::multipref",
+        "query_dataset_name": "MULTIPREF",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-e87ded10dfa033c3-9b84964d8a"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-5e55eb9879318709-9270ba962c",
+          "PRIOR:priorref-bcfd91f5bb153147-64fb20f228",
+          "PRIOR:priorref-429632ab9e323aa2-03da74e509",
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53",
+          "PRIOR:priorref-7e65f863df515b81-0f9d0cc2dc"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.250::dataset::0::noiserbench",
+        "query_dataset_name": "NoiserBench",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-080b9a1354fbe2fb-65895f8fc5"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-170b300b7aed6098-58ec3689a1",
+          "PRIOR:priorref-12c12bce39cf8998-19d8a76932",
+          "PRIOR:priorref-aa7800fa2fe587e9-97077daec4",
+          "PRIOR:priorref-5328c70ea956b9cc-20752d3448",
+          "PRIOR:priorref-429632ab9e323aa2-03da74e509"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-short.94::dataset::0::wicked-variants",
+        "query_dataset_name": "WiCkeD variants",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-7431798345410aba-302a0d5071",
+          "PRIOR:priorref-2df868a7b7939447-91d0c549ef",
+          "PRIOR:priorref-0fd897561aeb3606-1cc02e1b8f",
+          "PRIOR:priorref-739675b03802717e-454cd78c3c"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-5e360da1297c0132-ed35eb998b",
+          "PRIOR:priorref-828e28fa9dff914b-b2d56cd1bc",
+          "PRIOR:priorref-62fce0637cba516b-b8213d57f5",
+          "PRIOR:priorref-b1c32331eb1c957a-ebc89526c7",
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.417::dataset::0::self-error-instruct-sei-synthesized-data",
+        "query_dataset_name": "Self-Error-Instruct (SEI) synthesized data",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-315491a25d45c82d-0070a070d2"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-5328c70ea956b9cc-20752d3448",
+          "PRIOR:priorref-a4e8118468708994-bf15065571",
+          "PRIOR:priorref-ce861463d0cbfe6d-54343a78c2",
+          "PRIOR:priorref-be5a5c5e044c281a-9eab4c4653",
+          "PRIOR:priorref-09188d050bf2fcd4-41cc57623c"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-demo.64::dataset::0::value-compass-benchmarks",
+        "query_dataset_name": "Value Compass Benchmarks",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-b8ec6f50fa97c7e2-366cf8b21a",
+          "PRIOR:priorref-975635c10165ecff-845bb33195",
+          "PRIOR:priorref-5306ff6725feb5fb-291a20f0af",
+          "PRIOR:priorref-2d765145cb51dbec-751bf545b3",
+          "PRIOR:priorref-414b79ca04d0b42e-e37b75d1ed"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-short.20::dataset::0::judge-bench",
+        "query_dataset_name": "JUDGE-BENCH",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-ad1729c1c21024c6-b96172f36b",
+          "PRIOR:priorref-180601e583f996d5-aa486e2311"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d",
+          "PRIOR:priorref-62fce0637cba516b-b8213d57f5",
+          "PRIOR:priorref-8939960ab270947e-d8a0ee8bb1",
+          "PRIOR:priorref-7e65f863df515b81-0f9d0cc2dc",
+          "PRIOR:priorref-12d00a341ddd3daa-1012ff5f10"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1207::dataset::0::multi-turn-safety-alignment-dataset",
+        "query_dataset_name": "Multi-turn safety alignment dataset",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-7e5a12d4b6ed4b8b-81e5660059"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-7c3e77ffa2c1e480-a399f9c811",
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d",
+          "PRIOR:priorref-429632ab9e323aa2-03da74e509",
+          "PRIOR:priorref-b8ec6f50fa97c7e2-366cf8b21a",
+          "PRIOR:priorref-bc04b9b7fa645073-5bf650f4fd"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1172::dataset::0::marco-bench-mif",
+        "query_dataset_name": "Marco-Bench-MIF",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-af5913c5350102d1-9e24bbcb3d"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-afca4faffaef0e9b-ee7acfbfae",
+          "PRIOR:priorref-b6ce026e353f779a-ad144f7bc8",
+          "PRIOR:priorref-25633badfe3003ad-efda8b9f89",
+          "PRIOR:priorref-5328c70ea956b9cc-20752d3448",
+          "PRIOR:priorref-a4e8118468708994-bf15065571"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.193::dataset::0::wikipedia-based-multilingual-naturalness-benchmark",
+        "query_dataset_name": "Wikipedia-based Multilingual Naturalness Benchmark",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-3a766e348ed766d4-6390482afc",
+          "PRIOR:priorref-b6ce026e353f779a-ad144f7bc8",
+          "PRIOR:priorref-a4e8118468708994-bf15065571",
+          "PRIOR:priorref-080b9a1354fbe2fb-65895f8fc5",
+          "PRIOR:priorref-bcb23b746b3393e2-df83f85910"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1154::dataset::0::student-choice-dataset",
+        "query_dataset_name": "Student Choice Dataset",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-df91e985f6a23598-401bcd1787"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-193d20900a803156-2fde1cf2aa",
+          "PRIOR:priorref-0fd897561aeb3606-1cc02e1b8f",
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53",
+          "PRIOR:priorref-2df868a7b7939447-91d0c549ef",
+          "PRIOR:priorref-a64abd32b589ec42-36786234d4"
+        ]
+      }
+    ],
+    "gpt_5_4_listwise_rerank": [
+      {
+        "query_paper_id": "ACL:2025.acl-long.250::dataset::0::noiserbench",
+        "query_dataset_name": "NoiserBench",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-080b9a1354fbe2fb-65895f8fc5"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-170b300b7aed6098-58ec3689a1",
+          "PRIOR:priorref-2185b1f0c75502b5-a671a5745f",
+          "PRIOR:priorref-c4186310c5e9e9d4-726bd3e412",
+          "PRIOR:priorref-739675b03802717e-454cd78c3c",
+          "PRIOR:priorref-c8b6c1dc01b1f29f-01fb48d731"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.417::dataset::0::self-error-instruct-sei-synthesized-data",
+        "query_dataset_name": "Self-Error-Instruct (SEI) synthesized data",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-315491a25d45c82d-0070a070d2"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-2d765145cb51dbec-751bf545b3",
+          "PRIOR:priorref-828e28fa9dff914b-b2d56cd1bc",
+          "PRIOR:priorref-c4186310c5e9e9d4-726bd3e412",
+          "PRIOR:priorref-12d00a341ddd3daa-1012ff5f10",
+          "PRIOR:priorref-09188d050bf2fcd4-41cc57623c"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-short.20::dataset::0::judge-bench",
+        "query_dataset_name": "JUDGE-BENCH",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-ad1729c1c21024c6-b96172f36b",
+          "PRIOR:priorref-180601e583f996d5-aa486e2311"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-12d00a341ddd3daa-1012ff5f10",
+          "PRIOR:priorref-8939960ab270947e-d8a0ee8bb1",
+          "PRIOR:priorref-d103ec936300428e-0a41b60a58",
+          "PRIOR:priorref-ff30d0f193ae8532-f093923598",
+          "PRIOR:priorref-d228da24b4a6e4a7-19bad2e507"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.317::dataset::0::redial",
+        "query_dataset_name": "ReDial",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-315491a25d45c82d-0070a070d2",
+          "PRIOR:priorref-ceef1c51a6f17455-099489fbe6",
+          "PRIOR:priorref-2711dbc47fef80dd-532fe8e403"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-b6ce026e353f779a-ad144f7bc8",
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53",
+          "PRIOR:priorref-878ac5ac44a67147-d6916fb402",
+          "PRIOR:priorref-975635c10165ecff-845bb33195",
+          "PRIOR:priorref-6368e6f0447cb53c-2916f30239"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.193::dataset::0::wikipedia-based-multilingual-naturalness-benchmark",
+        "query_dataset_name": "Wikipedia-based Multilingual Naturalness Benchmark",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-3a766e348ed766d4-6390482afc",
+          "PRIOR:priorref-25633badfe3003ad-efda8b9f89",
+          "PRIOR:priorref-afca4faffaef0e9b-ee7acfbfae",
+          "PRIOR:priorref-b6ce026e353f779a-ad144f7bc8",
+          "PRIOR:priorref-d103ec936300428e-0a41b60a58"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1154::dataset::0::student-choice-dataset",
+        "query_dataset_name": "Student Choice Dataset",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-df91e985f6a23598-401bcd1787"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-2df868a7b7939447-91d0c549ef",
+          "PRIOR:priorref-0fd897561aeb3606-1cc02e1b8f",
+          "PRIOR:priorref-7431798345410aba-302a0d5071",
+          "PRIOR:priorref-16ff4e52042a0045-5988f35115",
+          "PRIOR:priorref-42c6bf20763ffe58-171d456950"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1027::dataset::0::vf-eval",
+        "query_dataset_name": "VF-EVAL",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-b20065af5bed8503-b83b067790"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-56f666999fcb2292-7e9d747d7a",
+          "PRIOR:priorref-c614f9718dc1f584-4ff64c3013",
+          "PRIOR:priorref-5306ff6725feb5fb-291a20f0af",
+          "PRIOR:priorref-c4186310c5e9e9d4-726bd3e412",
+          "PRIOR:priorref-170b300b7aed6098-58ec3689a1"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.957::dataset::0::dim-bench",
+        "query_dataset_name": "DIM-Bench",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-125717db76bc75ff-0bf47c7d02",
+          "PRIOR:priorref-193d20900a803156-2fde1cf2aa",
+          "PRIOR:priorref-975635c10165ecff-845bb33195"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-af5913c5350102d1-9e24bbcb3d",
+          "PRIOR:priorref-828e28fa9dff914b-b2d56cd1bc",
+          "PRIOR:priorref-12c12bce39cf8998-19d8a76932",
+          "PRIOR:priorref-bc04b9b7fa645073-5bf650f4fd",
+          "PRIOR:priorref-5e55eb9879318709-9270ba962c"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.855::dataset::0::cosyn-400k",
+        "query_dataset_name": "CoSyn-400K",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-8a8b4ad68ea3069f-cde3b0c38e"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-07ab11d60a89eb07-9b3c877b13",
+          "PRIOR:priorref-9e9372f4222d5637-6e775eed5f",
+          "PRIOR:priorref-15364fde2b44a450-1b60c121fb",
+          "PRIOR:priorref-66a4dfc7981cfa5f-a88100bfda",
+          "PRIOR:priorref-a64abd32b589ec42-36786234d4"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1160::dataset::0::cube-dataset",
+        "query_dataset_name": "CUBE dataset",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-df91e985f6a23598-401bcd1787",
+          "PRIOR:priorref-1a75f1a28dd7305c-862d2a6ead"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-170b300b7aed6098-58ec3689a1",
+          "PRIOR:priorref-39460a2e33d02626-b08da1b41e",
+          "PRIOR:priorref-c4186310c5e9e9d4-726bd3e412",
+          "PRIOR:priorref-a4e8118468708994-bf15065571",
+          "PRIOR:priorref-2d765145cb51dbec-751bf545b3"
+        ]
+      }
+    ]
+  },
+  "skipped": {},
+  "debug_counters": {
+    "splade_real": 0,
+    "splade_fallback_lexical": 0,
+    "splade_unavailable_no_sparse_encoder": 0,
+    "splade_unavailable_model_init_failed": 0,
+    "splade_unavailable_no_doc_embeddings": 0,
+    "splade_exception_runtime": 0,
+    "colbert_real": 0,
+    "colbert_fallback_dense": 0,
+    "colbert_early_empty_query_or_corpus": 0
+  }
+}

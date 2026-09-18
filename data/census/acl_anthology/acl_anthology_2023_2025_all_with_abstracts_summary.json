@@ -1,0 +1,231 @@
+{
+  "bib_entries_indexed": 121388,
+  "catalog_rows": 32397,
+  "matched_bib_entries": 32369,
+  "rows_with_abstract": 30939,
+  "rows_without_abstract": 1458,
+  "missing_bib_entries": 28,
+  "rows_by_year": {
+    "2023": 8334,
+    "2024": 11257,
+    "2025": 12806
+  },
+  "abstract_coverage_by_year": {
+    "2023": {
+      "rows": 8334,
+      "with_abstract": 7681
+    },
+    "2024": {
+      "rows": 11257,
+      "with_abstract": 10833
+    },
+    "2025": {
+      "rows": 12806,
+      "with_abstract": 12425
+    }
+  },
+  "missing_examples": [
+    {
+      "acl_id": "2023.finnlp-1.1",
+      "title": "Model-Agnostic Meta-Learning for Natural Language Understanding Tasks in Finance",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.10",
+      "title": "LoKI:Money Laundering Report Generation via Logical Table-to-Text using Meta Learning",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.11",
+      "title": "Multi-LingualESGIssue Identification",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.12",
+      "title": "Leveraging Contrastive Learning withBERTforESGIssue Identification",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.13",
+      "title": "LeveragingBERTLanguage Models for Multi-LingualESGIssue Identification",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.14",
+      "title": "EaSyGuide :ESGIssue Identification Framework leveraging Abilities of Generative Large Language Models",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.15",
+      "title": "Jetsons at theFinNLP-2023: Using Synthetic Data and Transfer Learning for MultilingualESGIssue Classification",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.16",
+      "title": "HKESGat theML-ESGTask: Exploring Transformer Representations for MultilingualESGIssue Identification",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.17",
+      "title": "TeamHHUat theFinNLP-2023ML-ESGTask: A Multi-Model Approach toESG-Key-Issue Classification",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.2",
+      "title": "ChatGPTas Data Augmentation for Compositional Generalization: A Case Study in Open Intent Detection",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.3",
+      "title": "Beyond Classification: Financial Reasoning in State-of-the-Art Language Models",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.4",
+      "title": "Textual Evidence Extraction forESGScores",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.5",
+      "title": "A Scalable and Adaptive System to Infer the Industry Sectors of Companies: Prompt + Model Tuning of Generative Language Models",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.6",
+      "title": "Using Deep Learning to Find the Next Unicorn: A Practical Synthesis on Optimization Target, Feature Selection, Data Split and Evaluation Strategy",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.7",
+      "title": "Breaking the Bank withChatGPT: Few-Shot Text Classification for Finance",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.8",
+      "title": "DeRisk: An Effective Deep Learning Framework for Credit Risk Prediction over Real-World Financial Data",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2023.finnlp-1.9",
+      "title": "Reducing tokenizer’s tokens per word ratio in Financial domain withT-MuFinBERTTokenizer",
+      "venue_prefix": "finnlp-1"
+    },
+    {
+      "acl_id": "2025.agentscen-1.1",
+      "title": "Multi-Scale Temporal Scenario Planning for Financial Networks: AGNNApproach to Stress Testing",
+      "venue_prefix": "agentscen-1"
+    },
+    {
+      "acl_id": "2025.agentscen-1.10",
+      "title": "Team MCG DSN at the AgentScen Shared Task: Knowledge Integration and Self-Improvement viaLLMs for Generating Business Ideas from Patent Documents",
+      "venue_prefix": "agentscen-1"
+    },
+    {
+      "acl_id": "2025.agentscen-1.2",
+      "title": "Enhancing the Planning Capabilities of Large Language Models by Building External World Models",
+      "venue_prefix": "agentscen-1"
+    }
+  ],
+  "no_abstract_examples": [
+    {
+      "acl_id": "2023.artofsafety-1.1",
+      "title": "Red Teaming for Large Language Models At Scale: Tackling Hallucinations on Mathematics Tasks",
+      "venue_prefix": "artofsafety-1"
+    },
+    {
+      "acl_id": "2023.artofsafety-1.2",
+      "title": "Student-Teacher Prompting for Red Teaming to Improve Guardrails",
+      "venue_prefix": "artofsafety-1"
+    },
+    {
+      "acl_id": "2023.artofsafety-1.3",
+      "title": "Distilling Adversarial Prompts from Safety Benchmarks: Report for the Adversarial Nibbler Challenge",
+      "venue_prefix": "artofsafety-1"
+    },
+    {
+      "acl_id": "2023.artofsafety-1.4",
+      "title": "Measuring Adversarial Datasets",
+      "venue_prefix": "artofsafety-1"
+    },
+    {
+      "acl_id": "2023.artofsafety-1.5",
+      "title": "Discovering Safety Issues in Text-to-Image Models: Insights from Adversarial Nibbler Challenge",
+      "venue_prefix": "artofsafety-1"
+    },
+    {
+      "acl_id": "2023.artofsafety-1.6",
+      "title": "Uncovering Bias in AI-Generated Images",
+      "venue_prefix": "artofsafety-1"
+    },
+    {
+      "acl_id": "2023.cl-1.6",
+      "title": "Finite-State Text Processing",
+      "venue_prefix": "cl-1"
+    },
+    {
+      "acl_id": "2023.cl-1.7",
+      "title": "Validity, Reliability, and Significance: Empirical Methods for NLP and Data Science",
+      "venue_prefix": "cl-1"
+    },
+    {
+      "acl_id": "2023.cl-1.8",
+      "title": "Pretrained Transformers for Text Ranking: BERT and Beyond",
+      "venue_prefix": "cl-1"
+    },
+    {
+      "acl_id": "2023.cl-1.9",
+      "title": "Conversational AI: Dialogue Systems, Conversational Agents, and Chatbots by Michael McTear",
+      "venue_prefix": "cl-1"
+    },
+    {
+      "acl_id": "2023.cl-3.7",
+      "title": "Statistical Methods for Annotation Analysis",
+      "venue_prefix": "cl-3"
+    },
+    {
+      "acl_id": "2023.cl-3.8",
+      "title": "Obituary: Yorick Wilks",
+      "venue_prefix": "cl-3"
+    },
+    {
+      "acl_id": "2023.clicit-1.10",
+      "title": "Building a Spoken Dialogue System for Supporting Blind People in Accessing Mathematical Expressions",
+      "venue_prefix": "clicit-1"
+    },
+    {
+      "acl_id": "2023.clicit-1.11",
+      "title": "Contrastive Language-Image Pre-training for the Italian Language",
+      "venue_prefix": "clicit-1"
+    },
+    {
+      "acl_id": "2023.clicit-1.12",
+      "title": "Modelling and Publishing the ``Lexicon der indogermanischen Verben'' as Linked Open Data",
+      "venue_prefix": "clicit-1"
+    },
+    {
+      "acl_id": "2023.clicit-1.13",
+      "title": "How Green is Sentiment Analysis? Environmental Topics in Corpora at the University of Turin",
+      "venue_prefix": "clicit-1"
+    },
+    {
+      "acl_id": "2023.clicit-1.14",
+      "title": "``Ti blocco perché sei un trollazzo''. Lexical Innovation in Contemporary Italian in a Large Twitter Corpus",
+      "venue_prefix": "clicit-1"
+    },
+    {
+      "acl_id": "2023.clicit-1.15",
+      "title": "Testing ChatGPT for Stability and Reasoning: A Case Study Using Italian Medical Specialty Tests",
+      "venue_prefix": "clicit-1"
+    },
+    {
+      "acl_id": "2023.clicit-1.16",
+      "title": "Assessing Language and Vision-Language Models on Event Plausibility",
+      "venue_prefix": "clicit-1"
+    },
+    {
+      "acl_id": "2023.clicit-1.17",
+      "title": "GPT-based Language Models meet Emojitaliano: A Preliminary Assessment Test between Automation and Creativity",
+      "venue_prefix": "clicit-1"
+    }
+  ]
+}

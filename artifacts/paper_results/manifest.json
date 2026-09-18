@@ -1,0 +1,18 @@
+{
+  "retrieval_sources": [
+    "data/benchmark/retrieval_cache/acl_pdf130_retrieval_with_gpt54mini_rerank_report.md"
+  ],
+  "attribution_jsonl": "data/benchmark/retrieval_cache/acl_pdf130_gpt54mini_oracle_fusion_attribution_rows.jsonl",
+  "annotation_template_jsonl": "data/benchmark/retrieval_cache/acl_pdf130_gpt54mini_oracle_human_eval_sample100_labeled_jason.jsonl",
+  "human_eval_report_json": "data/benchmark/retrieval_cache/acl_pdf130_gpt54mini_human_eval_jason_report.json",
+  "outputs": [
+    "attribution_profile_table.tex",
+    "attribution_summary.json",
+    "case_studies.json",
+    "case_studies.md",
+    "evidence_quality_table.tex",
+    "human_evidence_sample.jsonl",
+    "retrieval_metrics.json",
+    "retrieval_table.tex"
+  ]
+}

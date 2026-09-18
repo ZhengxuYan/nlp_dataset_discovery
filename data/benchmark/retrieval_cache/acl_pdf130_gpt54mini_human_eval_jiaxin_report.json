@@ -1,0 +1,208 @@
+{
+  "row_counts": {
+    "complete": 100,
+    "processed_corpus": 128
+  },
+  "legacy_label_distribution": {},
+  "retrieval": {
+    "fusion": {
+      "mrr": 0.5602063492063493,
+      "recall@1": 0.43,
+      "recall@10": 0.82,
+      "recall@3": 0.66,
+      "recall@5": 0.75
+    }
+  },
+  "miss_examples": {
+    "fusion": [
+      {
+        "query_paper_id": "ACL:2025.acl-long.355::dataset::0::multipref",
+        "query_dataset_name": "MULTIPREF",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-e87ded10dfa033c3-9b84964d8a"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-5e55eb9879318709-9270ba962c",
+          "PRIOR:priorref-bcfd91f5bb153147-64fb20f228",
+          "PRIOR:priorref-429632ab9e323aa2-03da74e509",
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53",
+          "PRIOR:priorref-7e65f863df515b81-0f9d0cc2dc"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.250::dataset::0::noiserbench",
+        "query_dataset_name": "NoiserBench",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-080b9a1354fbe2fb-65895f8fc5"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-170b300b7aed6098-58ec3689a1",
+          "PRIOR:priorref-12c12bce39cf8998-19d8a76932",
+          "PRIOR:priorref-aa7800fa2fe587e9-97077daec4",
+          "PRIOR:priorref-5328c70ea956b9cc-20752d3448",
+          "PRIOR:priorref-429632ab9e323aa2-03da74e509"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-short.94::dataset::0::wicked-variants",
+        "query_dataset_name": "WiCkeD variants",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-7431798345410aba-302a0d5071",
+          "PRIOR:priorref-2df868a7b7939447-91d0c549ef",
+          "PRIOR:priorref-0fd897561aeb3606-1cc02e1b8f",
+          "PRIOR:priorref-739675b03802717e-454cd78c3c"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-5e360da1297c0132-ed35eb998b",
+          "PRIOR:priorref-828e28fa9dff914b-b2d56cd1bc",
+          "PRIOR:priorref-62fce0637cba516b-b8213d57f5",
+          "PRIOR:priorref-b1c32331eb1c957a-ebc89526c7",
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.417::dataset::0::self-error-instruct-sei-synthesized-data",
+        "query_dataset_name": "Self-Error-Instruct (SEI) synthesized data",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-315491a25d45c82d-0070a070d2"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-5328c70ea956b9cc-20752d3448",
+          "PRIOR:priorref-a4e8118468708994-bf15065571",
+          "PRIOR:priorref-ce861463d0cbfe6d-54343a78c2",
+          "PRIOR:priorref-be5a5c5e044c281a-9eab4c4653",
+          "PRIOR:priorref-09188d050bf2fcd4-41cc57623c"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-demo.64::dataset::0::value-compass-benchmarks",
+        "query_dataset_name": "Value Compass Benchmarks",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-b8ec6f50fa97c7e2-366cf8b21a",
+          "PRIOR:priorref-975635c10165ecff-845bb33195",
+          "PRIOR:priorref-5306ff6725feb5fb-291a20f0af",
+          "PRIOR:priorref-2d765145cb51dbec-751bf545b3",
+          "PRIOR:priorref-414b79ca04d0b42e-e37b75d1ed"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-short.20::dataset::0::judge-bench",
+        "query_dataset_name": "JUDGE-BENCH",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-ad1729c1c21024c6-b96172f36b",
+          "PRIOR:priorref-180601e583f996d5-aa486e2311"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d",
+          "PRIOR:priorref-62fce0637cba516b-b8213d57f5",
+          "PRIOR:priorref-8939960ab270947e-d8a0ee8bb1",
+          "PRIOR:priorref-7e65f863df515b81-0f9d0cc2dc",
+          "PRIOR:priorref-12d00a341ddd3daa-1012ff5f10"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1207::dataset::0::multi-turn-safety-alignment-dataset",
+        "query_dataset_name": "Multi-turn safety alignment dataset",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-7e5a12d4b6ed4b8b-81e5660059"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-7c3e77ffa2c1e480-a399f9c811",
+          "PRIOR:priorref-7cbe1c34d26b7f4c-97023a474d",
+          "PRIOR:priorref-429632ab9e323aa2-03da74e509",
+          "PRIOR:priorref-b8ec6f50fa97c7e2-366cf8b21a",
+          "PRIOR:priorref-bc04b9b7fa645073-5bf650f4fd"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1172::dataset::0::marco-bench-mif",
+        "query_dataset_name": "Marco-Bench-MIF",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-af5913c5350102d1-9e24bbcb3d"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-afca4faffaef0e9b-ee7acfbfae",
+          "PRIOR:priorref-b6ce026e353f779a-ad144f7bc8",
+          "PRIOR:priorref-25633badfe3003ad-efda8b9f89",
+          "PRIOR:priorref-5328c70ea956b9cc-20752d3448",
+          "PRIOR:priorref-a4e8118468708994-bf15065571"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.193::dataset::0::wikipedia-based-multilingual-naturalness-benchmark",
+        "query_dataset_name": "Wikipedia-based Multilingual Naturalness Benchmark",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-3a766e348ed766d4-6390482afc",
+          "PRIOR:priorref-b6ce026e353f779a-ad144f7bc8",
+          "PRIOR:priorref-a4e8118468708994-bf15065571",
+          "PRIOR:priorref-080b9a1354fbe2fb-65895f8fc5",
+          "PRIOR:priorref-bcb23b746b3393e2-df83f85910"
+        ]
+      },
+      {
+        "query_paper_id": "ACL:2025.acl-long.1154::dataset::0::student-choice-dataset",
+        "query_dataset_name": "Student Choice Dataset",
+        "gold_prior_paper_ids": [
+          "PRIOR:priorref-df91e985f6a23598-401bcd1787"
+        ],
+        "top_retrieved": [
+          "PRIOR:priorref-193d20900a803156-2fde1cf2aa",
+          "PRIOR:priorref-0fd897561aeb3606-1cc02e1b8f",
+          "PRIOR:priorref-9f2a5dc262a5d7ad-31c71c7c53",
+          "PRIOR:priorref-2df868a7b7939447-91d0c549ef",
+          "PRIOR:priorref-a64abd32b589ec42-36786234d4"
+        ]
+      }
+    ]
+  },
+  "skipped": {},
+  "debug_counters": {
+    "splade_real": 0,
+    "splade_fallback_lexical": 0,
+    "splade_unavailable_no_sparse_encoder": 0,
+    "splade_unavailable_model_init_failed": 0,
+    "splade_unavailable_no_doc_embeddings": 0,
+    "splade_exception_runtime": 0,
+    "colbert_real": 0,
+    "colbert_fallback_dense": 0,
+    "colbert_early_empty_query_or_corpus": 0
+  },
+  "added_information_attribution": {
+    "conditions": {
+      "oracle": {
+        "n": 100,
+        "mean_added_information_score": 0.9483199855699858,
+        "mean_support_percentages": {
+          "contradicted": 0.0,
+          "not_comparable": 0.02,
+          "partially_supported": 0.05333333333333333,
+          "supported": 0.005,
+          "unsupported": 0.9216666666666667
+        },
+        "unsupported_by_delta_type": {
+          "scale/coverage": 88,
+          "data/source": 45,
+          "annotation/protocol": 83,
+          "task/domain": 65,
+          "evaluation/use": 41,
+          "other": 8,
+          "availability/quality": 11
+        }
+      }
+    },
+    "errors": [],
+    "evidence_quality": {
+      "n": 100,
+      "evidence_label_accuracy": 0.91,
+      "macro_f1": 0.485663082437276,
+      "evidence_precision": 0.95,
+      "rationale_groundedness_rate": 0.95
+    }
+  }
+}

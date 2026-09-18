@@ -1,0 +1,16 @@
+key,count
+source_dataset,7007
+comparison_dataset,5405
+baseline_benchmark,587
+closest_prior_dataset,451
+loosely_related,140
+comparison_benchmark,88
+inspired_by,40
+shared_task,28
+training_data,8
+knowledge_resource,3
+extended_from,2
+pretraining_corpus,1
+lexical_resource,1
+combined_with,1
+other,1

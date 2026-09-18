@@ -1,0 +1,22 @@
+{
+  "rows": 299,
+  "datasets": 310,
+  "mean_datasets_per_paper": 1.0367892976588629,
+  "mean_acus_per_dataset": 3.3548387096774195,
+  "hard_validation_error_rows": 0,
+  "quality_warning_rows": 148,
+  "runtime_seconds_total_observed": 3556.405999999998,
+  "runtime_seconds_mean_per_paper": 11.894334448160535,
+  "runtime_seconds_median_per_paper": 7.19,
+  "prompt_tokens_total": 2646229,
+  "output_tokens_total": 722400,
+  "total_tokens_total": 3368629,
+  "prompt_tokens_mean": 8850.264214046823,
+  "output_tokens_mean": 2416.0535117056857,
+  "total_tokens_mean": 11266.317725752508,
+  "estimated_input_cost": 0.0,
+  "estimated_output_cost": 0.0,
+  "estimated_total_cost": 0.0,
+  "input_price_per_1m": 0.0,
+  "output_price_per_1m": 0.0
+}

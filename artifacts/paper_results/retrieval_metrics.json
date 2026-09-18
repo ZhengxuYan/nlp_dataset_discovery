@@ -1,0 +1,30 @@
+{
+  "lexical": {
+    "mrr": 0.438,
+    "recall@1": 0.33,
+    "recall@3": 0.5,
+    "recall@5": 0.61,
+    "recall@10": 0.7
+  },
+  "dense": {
+    "mrr": 0.496,
+    "recall@1": 0.36,
+    "recall@3": 0.58,
+    "recall@5": 0.68,
+    "recall@10": 0.81
+  },
+  "fusion": {
+    "mrr": 0.56,
+    "recall@1": 0.43,
+    "recall@3": 0.66,
+    "recall@5": 0.75,
+    "recall@10": 0.82
+  },
+  "gpt_5_4_listwise_rerank": {
+    "mrr": 0.792,
+    "recall@1": 0.72,
+    "recall@3": 0.87,
+    "recall@5": 0.89,
+    "recall@10": 0.92
+  }
+}

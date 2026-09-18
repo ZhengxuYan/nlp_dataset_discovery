@@ -1,0 +1,14 @@
+key,count
+introduced_dataset,7057
+training_data,1336
+benchmark,992
+evaluation_set,673
+shared_task_dataset,112
+knowledge_resource,56
+lexical_resource,54
+pretraining_corpus,47
+instruction_tuning_data,47
+other,36
+preference_data,8
+annotation_set,3
+fine-tuning,1
