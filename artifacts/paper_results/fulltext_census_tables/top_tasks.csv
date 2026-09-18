@@ -1,0 +1,31 @@
+key,count
+machine translation,388
+question answering,319
+sentiment analysis,176
+Named Entity Recognition,166
+summarization,154
+mathematical reasoning,121
+reasoning,111
+question-answering,104
+code generation,102
+hate speech detection,91
+classification,87
+named entity recognition,83
+visual question answering,81
+Question Answering,79
+dependency parsing,78
+text classification,75
+information retrieval,69
+hallucination detection,67
+instruction following,64
+multiple-choice question answering,63
+instruction-following,62
+commonsense reasoning,61
+binary classification,61
+Natural Language Inference,58
+information extraction,58
+natural language inference,56
+automatic speech recognition,55
+coreference resolution,53
+fact-checking,52
+translation,51

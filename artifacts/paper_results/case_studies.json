@@ -1,0 +1,106 @@
+[
+  {
+    "case_type": "mostly_supported",
+    "query_paper_id": "ACL:2025.acl-long.1518::dataset::0::re3syn-generated-data",
+    "query_dataset_name": "Re3Syn-generated data",
+    "condition": "oracle",
+    "added_information_score": 0.0,
+    "attributions": [
+      {
+        "query_acu": "RE3SYN uses dependency recognition instead of just similarity to synthesize long-context data.",
+        "support_status": "not_comparable",
+        "best_prior_acus": [],
+        "delta_type": "other",
+        "rationale": "The prior ACUs are about LongBench and LongBench-E (benchmark scope, task categories, test instances, formatting, and length distribution), not about RE3SYN or any synthesis method. Therefore they do not provide evidence for or against the claim that RE3SYN uses dependency recognition instead of similarity."
+      },
+      {
+        "query_acu": "The framework uses OPT-350m to calculate perplexity for dependency recognition.",
+        "support_status": "not_comparable",
+        "best_prior_acus": [],
+        "delta_type": "other",
+        "rationale": "None of the prior ACUs mention OPT-350m, perplexity, dependency recognition, or RE3SYN’s framework details. The supplied prior support is unrelated LongBench metadata, so this claim cannot be compared against it."
+      },
+      {
+        "query_acu": "The framework reduces document redundancy compared to similarity-based concatenation.",
+        "support_status": "not_comparable",
+        "best_prior_acus": [],
+        "delta_type": "other",
+        "rationale": "The prior ACUs only describe LongBench and LongBench-E benchmark properties and do not address document redundancy or similarity-based concatenation. As a result, there is no basis in the supplied prior ACUs to support or contradict this RE3SYN claim."
+      }
+    ]
+  },
+  {
+    "case_type": "extension",
+    "query_paper_id": "ACL:2025.acl-long.317::dataset::0::redial",
+    "query_dataset_name": "ReDial",
+    "condition": "oracle",
+    "added_information_score": 1.0,
+    "attributions": [
+      {
+        "query_acu": "ReDial is the first high-quality, end-to-end human-annotated SE-AAVE parallel reasoning benchmark.",
+        "support_status": "unsupported",
+        "best_prior_acus": [],
+        "delta_type": "task/domain",
+        "rationale": "The prior ACUs discuss GSM8K, HumanEval, and FOLIO, not ReDial or any SE-AAVE parallel reasoning benchmark. No prior ACU supports the claim that ReDial is the first such benchmark or that it is end-to-end human-annotated."
+      },
+      {
+        "query_acu": "The dataset contains over 1.2K parallel query pairs covering four reasoning categories.",
+        "support_status": "unsupported",
+        "best_prior_acus": [],
+        "delta_type": "scale/coverage",
+        "rationale": "None of the prior ACUs mention ReDial, parallel query pairs, or four reasoning categories. The size and category coverage claim is not supported by the supplied prior ACUs."
+      },
+      {
+        "query_acu": "Annotators were hired to rewrite SE queries into AAVE while preserving critical information.",
+        "support_status": "unsupported",
+        "best_prior_acus": [],
+        "delta_type": "annotation/protocol",
+        "rationale": "The prior ACUs do not describe any annotation workflow for rewriting SE queries into AAVE, nor do they mention preserving critical information during annotation. This query claim is unsupported by the supplied prior evidence."
+      },
+      {
+        "query_acu": "Quality control involved cross-checking by AAVE speakers and sanity checks by non-AAVE speakers and GPT-4o.",
+        "support_status": "unsupported",
+        "best_prior_acus": [],
+        "delta_type": "availability/quality",
+        "rationale": "The prior ACUs contain no information about quality control, AAVE speakers, non-AAVE speakers, or GPT-4o. Therefore the specific QC procedure in the query ACU is unsupported."
+      }
+    ]
+  },
+  {
+    "case_type": "high_added_information",
+    "query_paper_id": "ACL:2025.acl-long.421::dataset::0::multiagentbench",
+    "query_dataset_name": "MultiAgentBench",
+    "condition": "oracle",
+    "added_information_score": 1.0,
+    "attributions": [
+      {
+        "query_acu": "MultiAgentBench covers six diverse interactive scenarios including research, Minecraft, database error analysis, coding, Werewolf, and Bargaining.",
+        "support_status": "unsupported",
+        "best_prior_acus": [],
+        "delta_type": "task/domain",
+        "rationale": "The prior ACUs describe AGENTBENCH as 8 distinct environments and categorize them as Code, Game, and Web groundings, but they do not support MultiAgentBench having six specific scenarios or list research, Minecraft, database error analysis, coding, Werewolf, and Bargaining."
+      },
+      {
+        "query_acu": "The benchmark uses milestone-based KPIs to measure task completion and individual agent contributions.",
+        "support_status": "unsupported",
+        "best_prior_acus": [],
+        "delta_type": "annotation/protocol",
+        "rationale": "None of the prior ACUs mention milestone-based KPIs, task completion metrics, or measuring individual agent contributions; they only describe AGENTBENCH's environments, model evaluation, and a failure mode."
+      },
+      {
+        "query_acu": "The framework supports four coordination protocols: star, chain, tree, and graph.",
+        "support_status": "unsupported",
+        "best_prior_acus": [],
+        "delta_type": "annotation/protocol",
+        "rationale": "The prior ACUs do not mention any coordination protocols or communication structures, so there is no support for star, chain, tree, and graph being supported."
+      },
+      {
+        "query_acu": "The benchmark includes both collaborative and competitive scenarios.",
+        "support_status": "unsupported",
+        "best_prior_acus": [],
+        "delta_type": "task/domain",
+        "rationale": "The prior ACUs say AGENTBENCH has environments in Code, Game, and Web groundings, but they do not indicate whether the benchmark includes collaborative, competitive, or both types of scenarios."
+      }
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+key,count
+GSM8K,81
+MMLU,71
+MATH,59
+HumanEval,48
+SQuAD,45
+Spider,43
+HotpotQA,40
+GLUE,34
+Natural Questions,31
+Wikipedia,31
+FLORES-200,28
+StereoSet,28
+SNLI,28
+MedQA,28
+MIMIC-III,27
+FEVER,26
+BEIR,26
+Alpaca,26
+ToolBench,26
+CrowS-Pairs,25
+MS MARCO,25
+MultiWOZ,24
+ChartQA,24
+BLiMP,23
+BBQ,22
+LongBench,22
+TruthfulQA,20
+MT-Bench,20
+LegalBench,20
+DailyDialog,19

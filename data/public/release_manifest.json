@@ -1,0 +1,73 @@
+{
+  "catalog_years": [
+    2020,
+    2025
+  ],
+  "files": {
+    "acl_catalog_2020_2025.jsonl.gz": {
+      "abstracts_included": false,
+      "complete": true,
+      "rows": 58026,
+      "rows_by_year": {
+        "2020": 7087,
+        "2021": 6995,
+        "2022": 8456,
+        "2023": 8881,
+        "2024": 11935,
+        "2025": 14672
+      }
+    },
+    "arxiv_catalog_2020_2025.jsonl.gz": {
+      "abstracts_included": false,
+      "complete": true,
+      "rows": 188687,
+      "rows_by_year": {
+        "2020": 20233,
+        "2021": 20754,
+        "2022": 23723,
+        "2023": 30693,
+        "2024": 40881,
+        "2025": 52403
+      }
+    },
+    "dataset_bank_2023_2025.jsonl.gz": {
+      "complete": true,
+      "quoted_evidence_included": false,
+      "rows": 22874,
+      "rows_by_year": {
+        "2023": 4820,
+        "2024": 7613,
+        "2025": 10441
+      }
+    },
+    "screening_labels_2020_2022.jsonl.gz": {
+      "available_by_corpus": {
+        "acl": 22508,
+        "arxiv": 63160
+      },
+      "complete": false,
+      "coverage_pct": 98.19,
+      "expected_by_corpus": {
+        "acl": 22538,
+        "arxiv": 64710
+      },
+      "rows": 85668,
+      "rows_by_year": {
+        "2020": 26820,
+        "2021": 27169,
+        "2022": 31679
+      }
+    }
+  },
+  "main_analysis_years": [
+    2023,
+    2025
+  ],
+  "notes": [
+    "The manuscript's dataset/DCU conclusions currently cover 2023-2025.",
+    "The 2020-2025 paper catalogs and arXiv citation enrichment are complete.",
+    "Consult docs/DATA_CARD.md before reusing derived annotations."
+  ],
+  "release_date": "2026-09-18",
+  "status": "research_snapshot"
+}

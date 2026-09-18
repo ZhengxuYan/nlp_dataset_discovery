@@ -1,0 +1,17 @@
+{
+  "enriched_duplicate_ids": {},
+  "enriched_jsonl": "data/processed/arxiv_2020_2025_paper_metadata_s2_enriched_final.jsonl",
+  "enriched_rows": 188687,
+  "extra_in_enriched": [],
+  "generated_at": "2026-08-28T15:02:46+00:00",
+  "input_duplicate_ids": {},
+  "input_jsonl": "data/processed/arxiv_2020_2025_dedup_no_acl_for_dataset_screening_v2.jsonl",
+  "input_rows": 188687,
+  "matched_count": 188687,
+  "matching_key": "public_metadata.metadata_enrichment.record_id",
+  "missing_in_enriched": [],
+  "status": "pass",
+  "unique_enriched_ids": 188687,
+  "unique_input_ids": 188687,
+  "uses_row_position": false
+}

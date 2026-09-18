@@ -1,0 +1,42 @@
+{
+  "oracle": {
+    "n": 100,
+    "mean_added_information_score": 0.9483199855699858,
+    "mean_support_percentages": {
+      "supported": 0.005,
+      "partially_supported": 0.05333333333333333,
+      "unsupported": 0.9216666666666667,
+      "contradicted": 0.0,
+      "not_comparable": 0.02
+    },
+    "unsupported_by_delta_type": {
+      "scale/coverage": 88,
+      "data/source": 45,
+      "annotation/protocol": 83,
+      "task/domain": 65,
+      "evaluation/use": 41,
+      "other": 8,
+      "availability/quality": 11
+    }
+  },
+  "fusion": {
+    "n": 100,
+    "mean_added_information_score": 0.9424617604617603,
+    "mean_support_percentages": {
+      "supported": 0.005,
+      "partially_supported": 0.08283333333333333,
+      "unsupported": 0.8988333333333333,
+      "contradicted": 0.0,
+      "not_comparable": 0.013333333333333332
+    },
+    "unsupported_by_delta_type": {
+      "scale/coverage": 79,
+      "data/source": 37,
+      "annotation/protocol": 87,
+      "task/domain": 80,
+      "evaluation/use": 37,
+      "availability/quality": 5,
+      "other": 7
+    }
+  }
+}
